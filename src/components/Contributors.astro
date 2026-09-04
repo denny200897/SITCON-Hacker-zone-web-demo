@@ -104,8 +104,7 @@ const contributors = [
   .half li {
     display: flex;
     align-items: center;
-    padding: 0 30px;
-    border-left: 1px solid var(--border-soft);
+    padding: 0 34px;
   }
   .name {
     color: var(--text-muted);
@@ -126,9 +125,9 @@ const contributors = [
     text-decoration-color: currentColor;
   }
   .link:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-  /* Stop the band while someone is reaching for a name. */
-  /* Held only while a name has keyboard focus, so it can be activated. */
-  .marquee:focus-within .track { animation-play-state: paused; }
+  /* Held only while a name has keyboard focus, so it can be activated. A
+     mouse click leaves focus on the link, which must not stop the band. */
+  .marquee:has(.link:focus-visible) .track { animation-play-state: paused; }
 
   @keyframes marquee {
     from { transform: translateX(0); }
