@@ -135,17 +135,17 @@ npm run build
 
 部署平台為 **Vercel**，設定集中在 `vercel.json`：build command、輸出目錄與所有回應標頭。推送到 `main` 即自動部署。
 
-部署前請確認 `astro.config.mjs` 的 `site` 已改為實際網域（目前是 `https://aegis.dev`），它會影響 sitemap 與絕對網址。
+正式網址為 <https://aegis.denny.li>，已設定於 `astro.config.mjs` 的 `site`（影響 sitemap 與絕對網址）。
 
 ### 強制 HTTPS
 
 1. **傳輸層**：Vercel 不以明文提供服務，對 HTTP 請求一律回 308 導向 HTTPS，憑證自動簽發與續期，這一層不需要設定
-2. **HSTS**：`vercel.json` 送出 `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`，瀏覽器在兩年內只會以 HTTPS 連線，連導向那一跳都省下。網域穩定後可送交 [hstspreload.org](https://hstspreload.org) 進入瀏覽器預載名單
+2. **HSTS**：`vercel.json` 送出 `Strict-Transport-Security: max-age=63072000; includeSubDomains`，瀏覽器在兩年內只會以 HTTPS 連線這個網域，連導向那一跳都省下。未加 `preload`：預載名單只接受可註冊網域（`denny.li`），子網域無法單獨送出；若日後要為 `denny.li` 整體申請預載，需在 apex 上設定並確認所有子網域都已支援 HTTPS
 3. **CSP `upgrade-insecure-requests`**：任何漏網的 http 子資源會自動改以 https 請求
 
 站內所有資源皆為 https 或同源相對路徑，沒有混合內容。刻意不使用 JavaScript 轉址：它保護不了第一個請求，而且會讓 `http://localhost` 的本機開發無法運作。
 
-若之後要把 `www` 併進主網域，在 Vercel 專案的 Domains 加入 `www.<網域>` 並設為 redirect 即可，不需要改 repo。
+網域在 Vercel 專案的 Domains 設定，變更網域不需要改動 repo，只要同步更新 `astro.config.mjs` 的 `site`。
 
 ## 開發者
 

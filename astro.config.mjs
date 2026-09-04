@@ -6,5 +6,5 @@ export default defineConfig({
     locales: ["en", "zh"],
     routing: { prefixDefaultLocale: false },
   },
-  site: 'https://aegis.dev',
+  site: 'https://aegis.denny.li',
 });
