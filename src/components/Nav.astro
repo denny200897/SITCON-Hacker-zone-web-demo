@@ -1,0 +1,131 @@
+---
+import Icons from "./Icons.astro";
+import { getLang, localePath, altPath, languages } from "../i18n/ui";
+import { copy } from "../i18n/copy";
+
+const lang = getLang(Astro.url);
+const t = copy[lang].nav;
+const links = t.links;
+const alternate = altPath(lang, Astro.url);
+const other = lang === "en" ? "zh" : "en";
+---
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href={localePath(lang, "/")}>Aegis CLI</a>
+
+    <nav class="nav-links" aria-label="Main">
+      {links.map((link) => <a href={link.href}>{link.label}</a>)}
+    </nav>
+
+    <div class="nav-end">
+      <a class="lang" href={alternate} hreflang={other} aria-label={t.language}>
+        {languages[other]}
+      </a>
+      <a class="nav-gh" href="https://github.com/aegis/aegis" rel="noopener">
+        <Icons name="github" size={22} />
+        <span>{t.github}</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 14px 0 0;
+    background: transparent;
+  }
+  .nav-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    height: 64px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    /* Opaque panel instead of backdrop-filter: a blurred backdrop has to be
+       recomposited on every scroll frame, which is the single most expensive
+       effect on this page. */
+    background: linear-gradient(180deg, #10151d, #0a0e14);
+    box-shadow:
+      0 18px 48px rgba(0, 0, 0, 0.32),
+      0 0 0 1px rgba(34, 195, 238, 0.03),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transition:
+      border-color 0.18s ease,
+      background-color 0.18s ease,
+      box-shadow 0.18s ease,
+      transform 0.18s ease;
+  }
+  .nav-inner:hover {
+    border-color: rgba(34, 195, 238, 0.18);
+    box-shadow:
+      0 22px 58px rgba(0, 0, 0, 0.38),
+      0 0 34px rgba(34, 195, 238, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+  .brand {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .nav-links {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+  .nav-links a { transition: color 0.15s ease; }
+  .nav-links a:hover { color: var(--text); }
+  .nav-end {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-left: auto;
+  }
+  .lang {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .lang:hover { color: var(--text); border-color: #2b3547; }
+  .nav-gh {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .nav-gh:hover { color: var(--accent); }
+
+  @media (max-width: 940px) {
+    .nav-inner { justify-content: space-between; }
+    .nav-links {
+      position: static;
+      transform: none;
+    }
+    .nav-links { display: none; }
+    .nav-gh span { display: none; }
+  }
+
+  @media (max-width: 620px) {
+    .nav { padding-top: 10px; }
+    .nav-inner {
+      height: 58px;
+      border-radius: 14px;
+      padding-inline: 18px;
+    }
+  }
+</style>

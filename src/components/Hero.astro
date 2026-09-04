@@ -1,0 +1,339 @@
+---
+import Icons from "./Icons.astro";
+import { getLang } from "../i18n/ui";
+import { copy } from "../i18n/copy";
+
+const lang = getLang(Astro.url);
+const t = copy[lang].hero;
+
+const installCommand = "curl -fsSL aegis.dev/install | sh";
+---
+
+<section class="hero" id="product" data-anim-scope>
+  <div class="container hero-inner">
+    <div class="hero-copy">
+      <p class="eyebrow">{t.eyebrow}</p>
+      <h1 aria-label="Aegis CLI">
+        <span>Aegis</span>
+        <span>CLI</span>
+      </h1>
+      <p class="tagline">{t.tagline}</p>
+      <p class="lede">{t.lede}</p>
+
+      <div class="install" aria-label={t.installLabel}>
+        <div class="install-glow" aria-hidden="true"></div>
+        <code><span class="prompt">$</span> <span class="command">{installCommand}</span><span class="cursor" aria-hidden="true"></span></code>
+        <button
+          type="button"
+          class="copy"
+          data-copy={installCommand}
+          aria-label={t.copy}
+        >
+          <Icons name="copy" size={17} />
+        </button>
+      </div>
+
+      <div class="cta">
+        <a class="btn btn-primary" href="/docs/install/">
+          <Icons name="terminal" size={18} /> {t.install}
+        </a>
+        <a
+          class="btn btn-ghost"
+          href="https://github.com/aegis/aegis"
+          rel="noopener"
+        >
+          <Icons name="github" size={18} /> {t.github}
+        </a>
+      </div>
+      <p class="note">{t.note}</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>(".copy").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const text = button.dataset.copy ?? "";
+      try {
+        await navigator.clipboard.writeText(text);
+        button.classList.add("copied");
+        setTimeout(() => button.classList.remove("copied"), 1400);
+      } catch {
+        /* clipboard unavailable */
+      }
+    });
+  });
+</script>
+
+<style define:vars={{ commandChars: installCommand.length }}>
+  .hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: calc(100svh - 74px);
+    padding: 80px 0 104px;
+    background:
+      linear-gradient(rgba(34, 195, 238, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 195, 238, 0.035) 1px, transparent 1px),
+      radial-gradient(circle at 50% 28%, rgba(34, 195, 238, 0.13), transparent 42%),
+      linear-gradient(180deg, #06090d 0%, #05070a 68%, var(--bg-alt) 100%);
+    background-size: 72px 72px, 72px 72px, auto, auto;
+  }
+  .hero::before,
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .hero::before {
+    background:
+      linear-gradient(90deg, transparent 0 22%, rgba(34, 195, 238, 0.1) 50%, transparent 78%),
+      linear-gradient(180deg, transparent 0 46%, rgba(52, 211, 153, 0.1) 50%, transparent 54%);
+    mask-image: linear-gradient(180deg, transparent, #000 16%, #000 72%, transparent);
+    opacity: 0.45;
+  }
+  .hero::after {
+    background:
+      radial-gradient(ellipse at center, transparent 0%, transparent 42%, rgba(5, 7, 10, 0.72) 100%),
+      linear-gradient(180deg, transparent 0 44%, rgba(34, 195, 238, 0.08) 46%, transparent 48% 100%);
+    opacity: 0.82;
+  }
+  .hero-inner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100svh - 258px);
+  }
+  .hero-copy {
+    width: min(100%, 880px);
+    text-align: center;
+  }
+  .hero-copy > :not(.install) {
+    animation: hero-rise 0.72s ease both;
+  }
+  .hero-copy > :nth-child(1) { animation-delay: 0.06s; }
+  .hero-copy > :nth-child(2) { animation-delay: 0.16s; }
+  .hero-copy > :nth-child(3) { animation-delay: 0.26s; }
+  .hero-copy > :nth-child(4) { animation-delay: 0.34s; }
+  .hero-copy > :nth-child(5) { animation-delay: 0.44s; }
+  .hero-copy > :nth-child(6) { animation-delay: 0.54s; }
+  .hero-copy > :nth-child(7) { animation-delay: 0.62s; }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+    color: var(--green);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  .eyebrow::before,
+  .eyebrow::after {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, currentColor);
+  }
+  .eyebrow::after {
+    background: linear-gradient(90deg, currentColor, transparent);
+  }
+  h1 {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.18em;
+    margin: 0;
+    font-size: clamp(62px, 10vw, 144px);
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 0.92;
+    text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(34, 195, 238, 0.14);
+  }
+  h1 span {
+    position: relative;
+    display: inline-block;
+    color: transparent;
+    background:
+      linear-gradient(180deg, #ffffff 0%, #dbeafe 48%, #7dd3fc 100%),
+      linear-gradient(90deg, transparent, rgba(34, 195, 238, 0.45), transparent);
+    background-size: 100% 100%, 240% 100%;
+    background-clip: text;
+    -webkit-background-clip: text;
+    /* The gradient fill is static: animating background-position on
+       background-clip: text repaints the whole headline every frame and cannot
+       be handled by the compositor. */
+  }
+  h1 span::after {
+    content: "";
+    position: absolute;
+    left: 0.05em;
+    right: 0.05em;
+    bottom: -0.08em;
+    height: 4px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--green), transparent);
+    opacity: 0.78;
+    box-shadow: 0 0 22px rgba(34, 195, 238, 0.35);
+    transform-origin: center;
+  }
+  .tagline {
+    margin: 30px 0 0;
+    font-size: clamp(20px, 2.4vw, 26px);
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  .lede {
+    margin: 18px auto 0;
+    max-width: 620px;
+    color: var(--text-muted);
+    font-size: 17px;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 30px;
+  }
+
+  .install {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 34px auto 0;
+    padding: 18px 18px 18px 22px;
+    width: fit-content;
+    max-width: min(100%, 640px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background:
+      linear-gradient(180deg, rgba(18, 23, 31, 0.92), rgba(8, 12, 18, 0.94)),
+      var(--bg-panel);
+    box-shadow:
+      0 26px 80px rgba(0, 0, 0, 0.34),
+      0 0 0 1px rgba(34, 195, 238, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    animation: hero-rise 0.72s ease 0.44s both;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  }
+  .install:hover {
+    transform: translateY(-4px);
+    border-color: rgba(34, 195, 238, 0.45);
+    box-shadow:
+      0 34px 90px rgba(0, 0, 0, 0.4),
+      0 0 36px rgba(34, 195, 238, 0.14),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  .install-glow {
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    /* A wide, soft gradient stands in for filter: blur(), so the layer is not
+       re-rasterized on every animation frame. The sweep only runs on hover. */
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(34, 195, 238, 0.28) 34%,
+      rgba(52, 211, 153, 0.22) 58%,
+      transparent 100%
+    );
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    z-index: -1;
+  }
+  .install:hover .install-glow {
+    opacity: 0.85;
+    animation: command-orbit 4.4s ease-in-out infinite;
+  }
+  .install code {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: clamp(13px, 2.1vw, 17px);
+    color: var(--text);
+    overflow-x: auto;
+    white-space: nowrap;
+    text-align: left;
+  }
+  .command {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    vertical-align: bottom;
+    animation: command-reveal 1.75s steps(var(--commandChars), end) 0.74s both;
+  }
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.15em;
+    margin-left: 3px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 14px rgba(34, 195, 238, 0.65);
+    vertical-align: -0.16em;
+  }
+  .prompt { color: var(--accent); margin-right: 8px; }
+  .copy {
+    display: grid;
+    place-items: center;
+    padding: 6px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: color 0.15s ease, background-color 0.15s ease;
+  }
+  .copy:hover { color: var(--text); background: #161d28; }
+  .copy.copied { color: var(--green); }
+
+  .note {
+    margin: 18px auto 0;
+    max-width: 540px;
+    color: var(--text-dim);
+    font-size: 13.5px;
+  }
+
+  @keyframes hero-rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.99);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  @keyframes command-orbit {
+    0%, 100% { opacity: 0.18; transform: translateX(-8%); }
+    50% { opacity: 0.62; transform: translateX(8%); }
+  }
+  @keyframes command-reveal {
+    from { width: 0; }
+    to { width: calc(var(--commandChars) * 1ch); }
+  }
+  @media (max-width: 720px) {
+    .hero {
+      min-height: auto;
+      padding: 58px 0 78px;
+      background-size: 48px 48px, 48px 48px, auto, auto;
+    }
+    .hero-inner { min-height: auto; }
+    h1 { font-size: clamp(54px, 18vw, 88px); }
+    .install { padding: 15px 14px; }
+    .install code { font-size: 12.5px; }
+    .command { animation: none; }
+  }
+
+  @media (max-width: 430px) {
+    .cta { flex-direction: column; }
+    .cta .btn { width: 100%; justify-content: center; }
+    .install { justify-content: flex-start; }
+  }
+</style>

@@ -1,0 +1,76 @@
+---
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+import CodeBlock from "../../../components/docs/CodeBlock.astro";
+
+const toc = [
+  { id: "name", label: "NAME" },
+  { id: "synopsis", label: "SYNOPSIS" },
+  { id: "description", label: "DESCRIPTION" },
+  { id: "examples", label: "EXAMPLES" },
+  { id: "flags", label: "FLAGS" },
+  { id: "exit-status", label: "EXIT STATUS" },
+  { id: "see-also", label: "SEE ALSO" },
+];
+---
+
+<DocsLayout
+  title="aegis init"
+  description="Detect the project stack and write a Aegis configuration file."
+  breadcrumbs={[{ label: "CLI reference", href: "/docs/cli/" }, { label: "init" }]}
+  toc={toc}
+>
+  <h2 id="name">NAME</h2>
+  <p><code>aegis init</code> — create <code>aegis.yml</code> for a repository.</p>
+
+  <h2 id="synopsis">SYNOPSIS</h2>
+  <CodeBlock title="synopsis">aegis init [PATH]
+    [--force] [--no-gitignore] [--rules=PACK,...]
+    [--non-interactive] [GLOBAL_FLAGS ...]</CodeBlock>
+
+  <h2 id="description">DESCRIPTION</h2>
+  <p>
+    <code>aegis init</code> inspects the repository for languages,
+    frameworks, package manifests, and datastores, then writes a
+    <code>aegis.yml</code> with a matching rule selection and test command.
+  </p>
+  <p>
+    The command refuses to overwrite an existing configuration unless
+    <code>--force</code> is given. It also appends <code>.aegis/</code> to
+    <code>.gitignore</code>, since that directory holds local analysis state.
+  </p>
+
+  <h2 id="examples">EXAMPLES</h2>
+  <CodeBlock title="shell">aegis init
+aegis init ./services/api --rules core,web-api
+aegis init --non-interactive --force</CodeBlock>
+
+  <h2 id="flags">FLAGS</h2>
+  <dl>
+    <dt>[PATH]</dt>
+    <dd>Repository or subdirectory to initialize. Defaults to the current directory.</dd>
+    <dt>--force</dt>
+    <dd>Overwrite an existing <code>aegis.yml</code>.</dd>
+    <dt>--no-gitignore</dt>
+    <dd>Do not modify <code>.gitignore</code>.</dd>
+    <dt>--rules=PACK,...</dt>
+    <dd>Write this rule selection instead of the detected one.</dd>
+    <dt>--non-interactive</dt>
+    <dd>
+      Never prompt. Detected values are accepted as-is, which makes the command
+      safe to run in automation.
+    </dd>
+  </dl>
+
+  <h2 id="exit-status">EXIT STATUS</h2>
+  <p>
+    <code>0</code> on success, <code>2</code> when a configuration already
+    exists and <code>--force</code> was not given, <code>3</code> when the
+    detected stack cannot be written as valid configuration.
+  </p>
+
+  <h2 id="see-also">SEE ALSO</h2>
+  <p>
+    <a href="/docs/cli/scan/">aegis scan</a>,
+    <a href="/docs/configuration/">Configuration</a>.
+  </p>
+</DocsLayout>

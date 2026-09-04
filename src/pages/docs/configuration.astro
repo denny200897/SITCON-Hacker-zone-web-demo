@@ -1,0 +1,118 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import CodeBlock from "../../components/docs/CodeBlock.astro";
+import Callout from "../../components/docs/Callout.astro";
+
+const toc = [
+  { id: "file-location", label: "File location" },
+  { id: "precedence", label: "Precedence" },
+  { id: "reference", label: "Configuration reference" },
+  { id: "example", label: "Complete example" },
+  { id: "environment", label: "Environment variables" },
+  { id: "ignoring", label: "Ignoring paths and findings" },
+];
+
+const suppressionExample = `// aegis-ignore-next-line sql-injection -- id is validated by the router schema
+const sql = \`SELECT * FROM users WHERE id = \${id}\`;`;
+---
+
+<DocsLayout
+  title="Configuration"
+  description="Control scan scope, severity thresholds, test execution, and reporting through aegis.yml."
+  breadcrumbs={[{ label: "Configuration" }]}
+  toc={toc}
+>
+  <h2 id="file-location">File location</h2>
+  <p>
+    Aegis reads <code>aegis.yml</code> from the repository root. Use
+    <code>--config PATH</code> to load a file from elsewhere, and
+    <code>aegis config print</code> to show the effective configuration
+    after all sources are merged.
+  </p>
+
+  <h2 id="precedence">Precedence</h2>
+  <p>Later sources override earlier ones:</p>
+  <ol>
+    <li>Built-in defaults.</li>
+    <li>User configuration in <code>~/.config/aegis/config.yml</code>.</li>
+    <li>Project configuration in <code>aegis.yml</code>.</li>
+    <li>Environment variables prefixed with <code>AEGIS_</code>.</li>
+    <li>Command-line flags.</li>
+  </ol>
+
+  <h2 id="reference">Configuration reference</h2>
+  <table>
+    <thead><tr><th>Key</th><th>Type</th><th>Default</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>version</code></td><td>integer</td><td>—</td><td>Configuration schema version. Required. Current value is <code>1</code>.</td></tr>
+      <tr><td><code>scan.include</code></td><td>list of glob</td><td><code>["**/*"]</code></td><td>Paths considered during review.</td></tr>
+      <tr><td><code>scan.exclude</code></td><td>list of glob</td><td><code>[]</code></td><td>Paths removed from the include set.</td></tr>
+      <tr><td><code>scan.diff</code></td><td>string</td><td>—</td><td>Default Git revision range, for example <code>origin/main...HEAD</code>.</td></tr>
+      <tr><td><code>scan.concurrency</code></td><td>integer</td><td>number of CPUs</td><td>Parallel analysis workers.</td></tr>
+      <tr><td><code>tests.enabled</code></td><td>boolean</td><td><code>true</code></td><td>Whether generated tests are executed. When false, findings stay unverified.</td></tr>
+      <tr><td><code>tests.timeout</code></td><td>duration</td><td><code>90s</code></td><td>Per-test execution timeout.</td></tr>
+      <tr><td><code>tests.command</code></td><td>string</td><td>auto-detected</td><td>Command used to start the application under test.</td></tr>
+      <tr><td><code>rules.source</code></td><td>string</td><td><code>registry</code></td><td><code>registry</code>, a Git URL, or a local directory.</td></tr>
+      <tr><td><code>rules.packs</code></td><td>list of string</td><td><code>["core"]</code></td><td>Rule packs to load.</td></tr>
+      <tr><td><code>report.format</code></td><td>string</td><td><code>text</code></td><td>One of <code>text</code>, <code>json</code>, <code>sarif</code>, <code>markdown</code>.</td></tr>
+      <tr><td><code>report.min_severity</code></td><td>string</td><td><code>low</code></td><td>Lowest severity included in output.</td></tr>
+      <tr><td><code>report.fail_on</code></td><td>string</td><td><code>high</code></td><td>Severity at which the command exits with status <code>1</code>.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="example">Complete example</h2>
+  <CodeBlock title="aegis.yml">version: 1
+
+scan:
+  include:
+    - "src/**"
+    - "services/**"
+  exclude:
+    - "**/*.test.ts"
+    - "vendor/**"
+  concurrency: 8
+
+tests:
+  enabled: true
+  timeout: 120s
+  command: "npm run start:test"
+
+rules:
+  source: registry
+  packs:
+    - core
+    - web-api
+    - secrets
+
+report:
+  format: sarif
+  min_severity: medium
+  fail_on: high</CodeBlock>
+
+  <h2 id="environment">Environment variables</h2>
+  <table>
+    <thead><tr><th>Variable</th><th>Equivalent</th></tr></thead>
+    <tbody>
+      <tr><td><code>AEGIS_CONFIG</code></td><td><code>--config</code></td></tr>
+      <tr><td><code>AEGIS_FORMAT</code></td><td><code>report.format</code></td></tr>
+      <tr><td><code>AEGIS_FAIL_ON</code></td><td><code>report.fail_on</code></td></tr>
+      <tr><td><code>AEGIS_CACHE_DIR</code></td><td>Cache location, default <code>~/.cache/aegis</code></td></tr>
+      <tr><td><code>AEGIS_NO_COLOR</code></td><td><code>--no-color</code></td></tr>
+      <tr><td><code>AEGIS_TOKEN</code></td><td>Token for private rule registries</td></tr>
+    </tbody>
+  </table>
+  <Callout type="caution" title="Tokens in CI">
+    <p>
+      Provide <code>AEGIS_TOKEN</code> through your CI secret store. Tokens
+      passed on the command line are visible in process listings and job logs.
+    </p>
+  </Callout>
+
+  <h2 id="ignoring">Ignoring paths and findings</h2>
+  <p>Exclude paths with <code>scan.exclude</code>, and suppress a specific finding inline:</p>
+  <CodeBlock title="src/api/users.ts" copy={suppressionExample}>{suppressionExample}</CodeBlock>
+  <p>
+    A reason after <code>--</code> is required. Suppressions are listed in every
+    report so that they stay reviewable.
+  </p>
+</DocsLayout>

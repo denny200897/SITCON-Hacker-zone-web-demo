@@ -1,0 +1,98 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import CodeBlock from "../../components/docs/CodeBlock.astro";
+import Callout from "../../components/docs/Callout.astro";
+
+const toc = [
+  { id: "github-actions", label: "GitHub Actions" },
+  { id: "gitlab", label: "GitLab CI" },
+  { id: "jenkins", label: "Jenkins" },
+  { id: "caching", label: "Caching" },
+  { id: "gating", label: "Gating a pipeline" },
+];
+
+const githubActions = `name: Aegis
+on: [pull_request]
+jobs:
+  aegis:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Aegis
+        run: curl -fsSL aegis.dev/install | sh
+      - name: Run scan
+        run: aegis scan --diff origin/\${{ github.base_ref }}...HEAD --format sarif --output aegis.sarif
+      - name: Upload results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: aegis.sarif`;
+
+const githubCache = `      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/aegis
+          key: aegis-\${{ runner.os }}-\${{ hashFiles('aegis.yml') }}`;
+
+const jenkinsPipeline = `stage('Aegis') {
+  steps {
+    sh 'curl -fsSL aegis.dev/install | sh'
+    sh 'aegis scan --format sarif --output aegis.sarif'
+  }
+  post {
+    always { archiveArtifacts artifacts: 'aegis.sarif' }
+  }
+}`;
+---
+
+<DocsLayout
+  title="Continuous integration"
+  description="Run Aegis on pull requests, upload results to your code-scanning dashboard, and fail builds on verified findings."
+  breadcrumbs={[{ label: "Continuous integration" }]}
+  toc={toc}
+>
+  <h2 id="github-actions">GitHub Actions</h2>
+  <CodeBlock title=".github/workflows/aegis.yml" copy={githubActions}>{githubActions}</CodeBlock>
+  <Callout type="note">
+    <p>
+      <code>fetch-depth: 0</code> is required for diff-scoped scans; a shallow
+      clone does not contain the base commit.
+    </p>
+  </Callout>
+
+  <h2 id="gitlab">GitLab CI</h2>
+  <CodeBlock title=".gitlab-ci.yml">aegis:
+  stage: test
+  script:
+    - curl -fsSL aegis.dev/install | sh
+    - aegis scan --diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME...HEAD --format sarif --output aegis.sarif
+  artifacts:
+    when: always
+    paths:
+      - aegis.sarif</CodeBlock>
+
+  <h2 id="jenkins">Jenkins</h2>
+  <CodeBlock title="Jenkinsfile" copy={jenkinsPipeline}>{jenkinsPipeline}</CodeBlock>
+
+  <h2 id="caching">Caching</h2>
+  <p>
+    Cache <code>~/.cache/aegis</code> between runs so rule packs and
+    analysis artifacts are not downloaded or rebuilt every time.
+  </p>
+  <CodeBlock title=".github/workflows/aegis.yml" copy={githubCache}>{githubCache}</CodeBlock>
+
+  <h2 id="gating">Gating a pipeline</h2>
+  <p>
+    <code>--fail-on</code> selects the severity that makes the command exit
+    non-zero. Start permissive, then tighten as the backlog shrinks.
+  </p>
+  <CodeBlock title="shell"># Report everything, never fail the build
+aegis scan --fail-on never
+
+# Fail only on verified critical findings
+aegis scan --fail-on critical</CodeBlock>
+  <p>See <a href="/docs/exit-codes/">Exit codes</a> for the full list of statuses.</p>
+</DocsLayout>

@@ -1,0 +1,162 @@
+---
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+import CodeBlock from "../../../components/docs/CodeBlock.astro";
+import Callout from "../../../components/docs/Callout.astro";
+
+const toc = [
+  { id: "name", label: "NAME" },
+  { id: "synopsis", label: "SYNOPSIS" },
+  { id: "description", label: "DESCRIPTION" },
+  { id: "examples", label: "EXAMPLES" },
+  { id: "positional", label: "POSITIONAL ARGUMENTS" },
+  { id: "flags", label: "FLAGS" },
+  { id: "output", label: "OUTPUT" },
+  { id: "exit-status", label: "EXIT STATUS" },
+  { id: "see-also", label: "SEE ALSO" },
+];
+---
+
+<DocsLayout
+  title="aegis scan"
+  description="Review a repository, map its attack surface, run generated security tests, and report verified findings."
+  breadcrumbs={[{ label: "CLI reference", href: "/docs/cli/" }, { label: "scan" }]}
+  toc={toc}
+>
+  <h2 id="name">NAME</h2>
+  <p><code>aegis scan</code> — review, test, and report in a single pass.</p>
+
+  <h2 id="synopsis">SYNOPSIS</h2>
+  <CodeBlock title="synopsis">aegis scan [PATH ...]
+    [--diff=REVISION_RANGE] [--rules=PACK,...] [--format=FORMAT]
+    [--output=PATH] [--min-severity=SEVERITY] [--fail-on=SEVERITY]
+    [--include-unverified] [--no-tests] [--timeout=DURATION]
+    [--concurrency=N] [GLOBAL_FLAGS ...]</CodeBlock>
+
+  <h2 id="description">DESCRIPTION</h2>
+  <p>
+    <code>aegis scan</code> runs the full pipeline. It reviews the selected
+    files, resolves entry points and data flows into an attack surface,
+    generates targeted tests for each candidate finding, executes them, and
+    prints the findings it could verify.
+  </p>
+  <p>
+    Progress is written to stderr and results to stdout, so the command can be
+    piped without extra flags. With <code>--output</code>, results are written
+    to a file instead.
+  </p>
+  <p>
+    Analysis state is stored under <code>.aegis/</code> and reused by
+    <a href="/docs/cli/test/"><code>aegis test</code></a> and
+    <a href="/docs/cli/report/"><code>aegis report</code></a>.
+  </p>
+
+  <h2 id="examples">EXAMPLES</h2>
+  <p>Scan the current repository:</p>
+  <CodeBlock title="shell">aegis scan</CodeBlock>
+
+  <p>Scan only what a pull request changes:</p>
+  <CodeBlock title="shell">aegis scan --diff origin/main...HEAD</CodeBlock>
+
+  <p>Scan two directories with a specific set of rule packs:</p>
+  <CodeBlock title="shell">aegis scan src services --rules core,web-api</CodeBlock>
+
+  <p>Produce SARIF for a code-scanning dashboard and fail only on critical findings:</p>
+  <CodeBlock title="shell">aegis scan --format sarif --output aegis.sarif --fail-on critical</CodeBlock>
+
+  <p>Review without executing tests, for an environment where the service cannot run:</p>
+  <CodeBlock title="shell">aegis scan --no-tests --include-unverified</CodeBlock>
+
+  <h2 id="positional">POSITIONAL ARGUMENTS</h2>
+  <dl>
+    <dt>[PATH ...]</dt>
+    <dd>
+      Files or directories to scan, relative to the repository root. Defaults to
+      the paths in <code>scan.include</code>, or the whole tree. Paths given
+      here are still filtered by <code>scan.exclude</code>.
+    </dd>
+  </dl>
+
+  <h2 id="flags">FLAGS</h2>
+  <dl>
+    <dt>--diff=REVISION_RANGE</dt>
+    <dd>
+      Restrict the review to files changed in a Git revision range, for example
+      <code>origin/main...HEAD</code>. Requires full history in the checkout.
+    </dd>
+    <dt>--rules=PACK,...</dt>
+    <dd>
+      Comma-separated rule packs, or a path to a directory of rule files.
+      Overrides <code>rules.packs</code>. See <a href="/docs/rulesets/">Rulesets</a>.
+    </dd>
+    <dt>--format=text|json|sarif|markdown</dt>
+    <dd>Output format. Default is <code>text</code>.</dd>
+    <dt>--output=PATH</dt>
+    <dd>Write results to <code>PATH</code> instead of stdout.</dd>
+    <dt>--min-severity=critical|high|medium|low</dt>
+    <dd>Omit findings below this severity from the output. Default is <code>low</code>.</dd>
+    <dt>--fail-on=critical|high|medium|low|never</dt>
+    <dd>
+      Severity at which the command exits with status <code>1</code>. Default is
+      <code>high</code>. <code>never</code> always exits <code>0</code> when the
+      scan itself succeeds.
+    </dd>
+    <dt>--include-unverified</dt>
+    <dd>
+      Also report candidate findings that tests could not reproduce. They are
+      marked <code>unverified</code> and never trigger <code>--fail-on</code>.
+    </dd>
+    <dt>--no-tests</dt>
+    <dd>Skip test generation and execution. Equivalent to <code>tests.enabled: false</code>.</dd>
+    <dt>--timeout=DURATION</dt>
+    <dd>Per-test timeout, such as <code>90s</code> or <code>3m</code>. Default is <code>90s</code>.</dd>
+    <dt>--concurrency=N</dt>
+    <dd>Number of parallel analysis workers. Default is the number of CPUs.</dd>
+    <dt>--baseline=PATH</dt>
+    <dd>
+      Suppress findings already present in a previous result file, so only new
+      findings are reported.
+    </dd>
+  </dl>
+  <Callout type="note">
+    <p>
+      <code>--fail-on</code> considers verified findings only. A candidate shown
+      with <code>--include-unverified</code> never changes the exit status.
+    </p>
+  </Callout>
+
+  <h2 id="output">OUTPUT</h2>
+  <p>
+    <code>text</code> is designed for terminals and is not a stable interface.
+    Parse <code>json</code> or <code>sarif</code> in automation; both follow a
+    versioned schema and changes are announced in the release notes.
+  </p>
+  <CodeBlock title="json">{`{
+  "version": "1.8.2",
+  "findings": [
+    {
+      "id": "sql-injection",
+      "severity": "critical",
+      "verified": true,
+      "location": { "path": "src/api/users.ts", "line": 84 },
+      "evidence": { "test": "sqli-users-id", "result": "unexpected_rows" },
+      "remediation": "Use parameterized queries or an ORM."
+    }
+  ],
+  "summary": { "critical": 1, "high": 0, "medium": 0, "low": 0 }
+}`}</CodeBlock>
+
+  <h2 id="exit-status">EXIT STATUS</h2>
+  <p>
+    <code>0</code> when no finding met <code>--fail-on</code>, <code>1</code>
+    when one did, and other codes on error. See
+    <a href="/docs/exit-codes/">Exit codes</a>.
+  </p>
+
+  <h2 id="see-also">SEE ALSO</h2>
+  <p>
+    <a href="/docs/cli/init/">aegis init</a>,
+    <a href="/docs/cli/test/">aegis test</a>,
+    <a href="/docs/cli/report/">aegis report</a>,
+    <a href="/docs/configuration/">Configuration</a>.
+  </p>
+</DocsLayout>

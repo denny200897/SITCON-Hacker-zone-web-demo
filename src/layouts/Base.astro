@@ -1,0 +1,73 @@
+---
+import "../styles/global.css";
+import { getLang, altPath } from "../i18n/ui";
+import { copy } from "../i18n/copy";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const lang = getLang(Astro.url);
+const t = copy[lang];
+
+const { title = t.meta.title, description = t.meta.description } = Astro.props;
+
+// Both locales describe the same page, so each one points at the other.
+const alternate = altPath(lang, Astro.url);
+---
+
+<!doctype html>
+<html lang={lang === "zh" ? "zh-Hant" : "en"}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={lang === "zh" ? "zh_TW" : "en_US"} />
+    <link rel="alternate" hreflang={lang === "zh" ? "en" : "zh-Hant"} href={alternate} />
+    <meta name="theme-color" content="#05070a" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+    />
+  </head>
+  <body>
+    <slot />
+
+    <script>
+      // Pause decorative animation in sections that are off screen. Without
+      // this, the hero and the workbench keep compositing frames while the
+      // reader is somewhere else on the page.
+      const scopes = document.querySelectorAll("[data-anim-scope]");
+
+      if (scopes.length > 0 && "IntersectionObserver" in window) {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              const el = entry.target;
+              if (entry.isIntersecting) {
+                delete el.dataset.animPaused;
+              } else {
+                el.dataset.animPaused = "";
+              }
+            }
+          },
+          { rootMargin: "120px" }
+        );
+
+        scopes.forEach((scope) => {
+          scope.dataset.animPaused = "";
+          observer.observe(scope);
+        });
+      }
+    </script>
+  </body>
+</html>

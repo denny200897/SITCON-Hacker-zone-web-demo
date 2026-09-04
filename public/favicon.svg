@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Terminal prompt: a dark rounded tile with a cyan `>_`. Strokes are heavy
+       enough to stay legible at 16px. -->
+  <rect width="32" height="32" rx="7" fill="#05070a"/>
+  <rect x="0.9" y="0.9" width="30.2" height="30.2" rx="6.2" fill="none"
+        stroke="#1c2330" stroke-width="1.8"/>
+  <path d="M8.5 10.5L14 16l-5.5 5.5" fill="none" stroke="#22c3ee"
+        stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M17 22h7" fill="none" stroke="#22c3ee" stroke-width="3.2"
+        stroke-linecap="round"/>
+</svg>

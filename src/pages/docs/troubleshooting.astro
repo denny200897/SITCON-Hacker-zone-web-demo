@@ -1,0 +1,71 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import CodeBlock from "../../components/docs/CodeBlock.astro";
+
+const toc = [
+  { id: "diagnostics", label: "Collecting diagnostics" },
+  { id: "common", label: "Common problems" },
+  { id: "reporting", label: "Reporting a bug" },
+];
+---
+
+<DocsLayout
+  title="Troubleshooting"
+  description="Diagnose failed scans, missing findings, and environment problems."
+  breadcrumbs={[{ label: "Troubleshooting" }]}
+  toc={toc}
+>
+  <h2 id="diagnostics">Collecting diagnostics</h2>
+  <CodeBlock title="shell">aegis doctor
+aegis scan --verbose --log-file aegis.log</CodeBlock>
+  <p>
+    <code>--verbose</code> writes the analysis plan, the generated tests, and
+    every test result. Logs redact values that match the <code>secrets</code>
+    rule pack.
+  </p>
+
+  <h2 id="common">Common problems</h2>
+  <h3>"not a git repository"</h3>
+  <p>
+    Run Aegis from inside the working tree, or pass an explicit path:
+    <code>aegis scan /path/to/repo</code>.
+  </p>
+
+  <h3>"base revision not found" during a diff scan</h3>
+  <p>
+    Your CI checkout is shallow. Fetch full history — with
+    <code>actions/checkout@v4</code>, set <code>fetch-depth: 0</code>.
+  </p>
+
+  <h3>Exit status 4: the application under test never started</h3>
+  <p>
+    Set <code>tests.command</code> in <code>aegis.yml</code> to the command
+    that starts your service, and confirm it works on its own. Increase
+    <code>tests.timeout</code> for services with a slow boot.
+  </p>
+
+  <h3>A known issue is not reported</h3>
+  <p>
+    Verified reporting hides candidates that could not be reproduced. Re-run
+    with <code>--include-unverified</code> to see them, and check that the file
+    is not excluded by <code>scan.exclude</code> or an inline suppression.
+  </p>
+
+  <h3>Scans are slow</h3>
+  <p>
+    Scope the scan to a diff, raise <code>scan.concurrency</code>, and cache
+    <code>~/.cache/aegis</code> in CI. Disabling
+    <code>tests.enabled</code> makes scans faster, at the cost of verification.
+  </p>
+
+  <h2 id="reporting">Reporting a bug</h2>
+  <p>
+    Open an issue with the output of <code>aegis --version</code> and
+    <code>aegis doctor</code>, the command you ran, and the relevant portion
+    of the verbose log.
+  </p>
+  <ul>
+    <li><a href="https://github.com/aegis/aegis/issues">Issue tracker</a></li>
+    <li><a href="https://github.com/aegis/aegis/security">Security policy</a> — report vulnerabilities in Aegis privately.</li>
+  </ul>
+</DocsLayout>

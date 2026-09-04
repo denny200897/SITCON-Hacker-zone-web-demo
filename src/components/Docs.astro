@@ -1,0 +1,118 @@
+---
+import Icons from "./Icons.astro";
+import { getLang } from "../i18n/ui";
+import { copy } from "../i18n/copy";
+
+const lang = getLang(Astro.url);
+const t = copy[lang].docs;
+
+type Token = { t: string; c?: string };
+const lines: Token[][] = [
+  [{ t: "name", c: "key" }, { t: ": Aegis" }],
+  [{ t: "on", c: "key" }, { t: ": [pull_request]" }],
+  [{ t: "jobs", c: "key" }, { t: ":" }],
+  [{ t: "  aegis", c: "key" }, { t: ":" }],
+  [{ t: "    runs-on", c: "key" }, { t: ": ubuntu-latest" }],
+  [{ t: "    steps", c: "key" }, { t: ":" }],
+  [{ t: "      - ", c: "dash" }, { t: "uses", c: "key" }, { t: ": actions/checkout@v4" }],
+  [{ t: "        with", c: "key" }, { t: ": { fetch-depth: 0 }" }],
+  [{ t: "      - ", c: "dash" }, { t: "name", c: "key" }, { t: ": Install Aegis CLI" }],
+  [{ t: "        run", c: "key" }, { t: ": curl -fsSL aegis.dev/install | sh" }],
+  [{ t: "      - ", c: "dash" }, { t: "name", c: "key" }, { t: ": Review and verify" }],
+  [{ t: "        run", c: "key" }, { t: ": aegis scan --diff origin/main...HEAD \\" }],
+  [{ t: "            --format sarif --output aegis.sarif" }],
+];
+---
+
+<section class="docs" id="docs">
+  <div class="container docs-inner">
+    <div class="docs-copy">
+      <h2>{t.title}</h2>
+      <p>{t.body}</p>
+      <a class="docs-link" href="/docs/">
+        {t.link} <Icons name="arrow-right" size={18} />
+      </a>
+    </div>
+
+    <figure class="snippet">
+      <figcaption>.github/workflows/aegis.yml</figcaption>
+      <pre><code>{lines.map((line, i) => (
+        <span class="line"><span class="ln">{i + 1}</span>{line.map((token) => (
+          <span class:list={[token.c]}>{token.t}</span>
+        ))}
+</span>
+      ))}</code></pre>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .docs {
+    padding: 96px 0;
+    border-top: 1px solid var(--border-soft);
+  }
+  .docs-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 64px;
+    align-items: center;
+  }
+  h2 {
+    margin: 0 0 18px;
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .docs-copy p {
+    margin: 0 0 28px;
+    max-width: 320px;
+    color: var(--text-muted);
+    font-size: 16.5px;
+  }
+  .docs-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .docs-link:hover { color: var(--accent-strong); }
+
+  .snippet {
+    margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-terminal);
+    overflow: hidden;
+  }
+  figcaption {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+  }
+  pre {
+    margin: 0;
+    padding: 18px 18px 22px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.75;
+    color: #c8d3e2;
+  }
+  .line { display: block; white-space: pre; }
+  .ln {
+    display: inline-block;
+    width: 30px;
+    color: var(--text-dim);
+    user-select: none;
+  }
+  .key { color: var(--accent); }
+  .dash { color: var(--green); }
+
+  @media (max-width: 900px) {
+    .docs { padding: 64px 0; }
+    .docs-inner { grid-template-columns: 1fr; gap: 36px; }
+  }
+</style>

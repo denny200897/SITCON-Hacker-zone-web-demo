@@ -1,0 +1,80 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import CodeBlock from "../../components/docs/CodeBlock.astro";
+
+const toc = [
+  { id: "packs", label: "Built-in packs" },
+  { id: "selecting", label: "Selecting packs" },
+  { id: "authoring", label: "Authoring a rule" },
+  { id: "sharing", label: "Sharing a ruleset" },
+  { id: "mirroring", label: "Mirroring for offline use" },
+];
+---
+
+<DocsLayout
+  title="Rulesets"
+  description="Rule packs decide what Aegis looks for. Use the built-in packs, write your own, or share them across repositories."
+  breadcrumbs={[{ label: "Rulesets" }]}
+  toc={toc}
+>
+  <h2 id="packs">Built-in packs</h2>
+  <table>
+    <thead><tr><th>Pack</th><th>Contents</th></tr></thead>
+    <tbody>
+      <tr><td><code>core</code></td><td>Injection, deserialization, path traversal, SSRF, and unsafe command execution.</td></tr>
+      <tr><td><code>web-api</code></td><td>Authentication, authorization, CORS, session handling, and rate limiting.</td></tr>
+      <tr><td><code>secrets</code></td><td>Credentials committed to the repository, in configuration, and in build artifacts.</td></tr>
+      <tr><td><code>supply-chain</code></td><td>Dependency confusion, unpinned dependencies, and known vulnerable versions.</td></tr>
+      <tr><td><code>cloud</code></td><td>Overly permissive IAM policies and exposed storage in infrastructure as code.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="selecting">Selecting packs</h2>
+  <CodeBlock title="shell">aegis rules list
+aegis scan --rules core,web-api,secrets</CodeBlock>
+  <p>The same selection can be made permanent in <code>aegis.yml</code> under <code>rules.packs</code>.</p>
+
+  <h2 id="authoring">Authoring a rule</h2>
+  <p>
+    A rule describes a source of untrusted input, a sink, and the test used to
+    verify that the two are connected.
+  </p>
+  <CodeBlock title=".aegis/rules/raw-sql.yml">id: internal-raw-sql
+name: Raw SQL built from request data
+severity: critical
+languages: [typescript, javascript]
+
+sources:
+  - pattern: "req.query.$X"
+  - pattern: "req.body.$X"
+
+sinks:
+  - pattern: "db.query($SQL, ...)"
+
+verify:
+  kind: http
+  payload: "1 OR 1=1"
+  expect: unexpected_rows
+
+remediation: >
+  Use parameterized queries or an ORM. Never interpolate request data
+  into a SQL string.</CodeBlock>
+  <p>Validate and try it against the current repository:</p>
+  <CodeBlock title="shell">aegis rules validate .aegis/rules/raw-sql.yml
+aegis scan --rules ./.aegis/rules</CodeBlock>
+
+  <h2 id="sharing">Sharing a ruleset</h2>
+  <p>Point <code>rules.source</code> at a Git repository to share rules across projects.</p>
+  <CodeBlock title="aegis.yml">rules:
+  source: git+https://github.com/acme/aegis-rules@v3
+  packs:
+    - core
+    - acme-internal</CodeBlock>
+
+  <h2 id="mirroring">Mirroring for offline use</h2>
+  <CodeBlock title="shell"># On a connected machine
+aegis rules export --output ./aegis-rules
+
+# On the air-gapped host
+aegis scan --rules ./aegis-rules</CodeBlock>
+</DocsLayout>

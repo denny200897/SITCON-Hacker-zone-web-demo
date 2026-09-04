@@ -1,0 +1,75 @@
+---
+import Icons from "./Icons.astro";
+import { getLang, localePath } from "../i18n/ui";
+import { copy } from "../i18n/copy";
+
+const lang = getLang(Astro.url);
+const t = copy[lang].footer;
+const columns = t.columns;
+---
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div class="footer-brand">
+      <a class="brand" href={localePath(lang, "/")}>Aegis CLI</a>
+      <p>{t.tagline}</p>
+    </div>
+
+    {columns.map((column) => (
+      <nav class="col" aria-label={column.title}>
+        <h3>{column.title}</h3>
+        <ul>
+          {column.links.map((link) => (
+            <li><a href={link.href}>{link.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+    ))}
+  </div>
+
+  <div class="container footer-bottom">
+    <span>&copy; {new Date().getFullYear()} Aegis CLI. {t.rights}</span>
+    <a href="https://github.com/aegis/aegis" rel="noopener">
+      <Icons name="github" size={18} />
+    </a>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: 64px 0 32px;
+    background: var(--bg-alt);
+    border-top: 1px solid var(--border-soft);
+  }
+  .footer-inner {
+    display: grid;
+    grid-template-columns: 1.6fr repeat(3, 1fr);
+    gap: 40px;
+  }
+  .brand {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .footer-brand p { margin: 14px 0 0; color: var(--text-dim); font-size: 14px; }
+  h3 { margin: 0 0 14px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); }
+  ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+  ul a { color: var(--text-muted); font-size: 14.5px; }
+  ul a:hover { color: var(--text); }
+
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-soft);
+    color: var(--text-dim);
+    font-size: 13.5px;
+  }
+  .footer-bottom a:hover { color: var(--text); }
+
+  @media (max-width: 800px) {
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+  }
+</style>

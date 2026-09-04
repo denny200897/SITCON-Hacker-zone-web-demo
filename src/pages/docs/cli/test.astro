@@ -1,0 +1,83 @@
+---
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+import CodeBlock from "../../../components/docs/CodeBlock.astro";
+
+const toc = [
+  { id: "name", label: "NAME" },
+  { id: "synopsis", label: "SYNOPSIS" },
+  { id: "description", label: "DESCRIPTION" },
+  { id: "examples", label: "EXAMPLES" },
+  { id: "flags", label: "FLAGS" },
+  { id: "exit-status", label: "EXIT STATUS" },
+  { id: "see-also", label: "SEE ALSO" },
+];
+---
+
+<DocsLayout
+  title="aegis test"
+  description="Execute generated security tests against an existing analysis."
+  breadcrumbs={[{ label: "CLI reference", href: "/docs/cli/" }, { label: "test" }]}
+  toc={toc}
+>
+  <h2 id="name">NAME</h2>
+  <p><code>aegis test</code> — run the verification step on its own.</p>
+
+  <h2 id="synopsis">SYNOPSIS</h2>
+  <CodeBlock title="synopsis">aegis test [FINDING_ID ...]
+    [--target=URL] [--command=COMMAND] [--timeout=DURATION]
+    [--keep-artifacts] [--dry-run] [GLOBAL_FLAGS ...]</CodeBlock>
+
+  <h2 id="description">DESCRIPTION</h2>
+  <p>
+    <code>aegis test</code> reuses the analysis stored in
+    <code>.aegis/</code> by the last scan and runs its generated tests
+    again. Use it to re-verify a finding after a fix, or to run verification in
+    an environment where the service is available but the source is not.
+  </p>
+  <p>
+    Without arguments, every candidate from the last analysis is tested. With
+    one or more <code>FINDING_ID</code> arguments, only those are tested.
+  </p>
+
+  <h2 id="examples">EXAMPLES</h2>
+  <CodeBlock title="shell"># Re-verify everything from the last scan
+aegis test
+
+# Re-verify one finding after a fix
+aegis test sql-injection-1
+
+# Test a deployed instance instead of a locally started one
+aegis test --target https://staging.example.com
+
+# Show the generated tests without running them
+aegis test --dry-run</CodeBlock>
+
+  <h2 id="flags">FLAGS</h2>
+  <dl>
+    <dt>[FINDING_ID ...]</dt>
+    <dd>Findings to verify. Identifiers appear in the scan output and in JSON results.</dd>
+    <dt>--target=URL</dt>
+    <dd>Run tests against a running instance instead of starting one locally.</dd>
+    <dt>--command=COMMAND</dt>
+    <dd>Command used to start the application under test. Overrides <code>tests.command</code>.</dd>
+    <dt>--timeout=DURATION</dt>
+    <dd>Per-test timeout. Default is <code>90s</code>.</dd>
+    <dt>--keep-artifacts</dt>
+    <dd>Preserve requests, responses, and logs under <code>.aegis/artifacts/</code>.</dd>
+    <dt>--dry-run</dt>
+    <dd>Print the tests that would run, then exit without executing them.</dd>
+  </dl>
+
+  <h2 id="exit-status">EXIT STATUS</h2>
+  <p>
+    <code>0</code> when no test reproduced a finding at or above
+    <code>report.fail_on</code>, <code>1</code> when one did, <code>4</code>
+    when the application under test could not be started.
+  </p>
+
+  <h2 id="see-also">SEE ALSO</h2>
+  <p>
+    <a href="/docs/cli/scan/">aegis scan</a>,
+    <a href="/docs/cli/report/">aegis report</a>.
+  </p>
+</DocsLayout>

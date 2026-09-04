@@ -1,0 +1,151 @@
+---
+import { getLang } from "../i18n/ui";
+import { copy } from "../i18n/copy";
+
+const lang = getLang(Astro.url);
+const t = copy[lang].contributors;
+
+/** Anything that is not an http(s) URL is rendered as plain text, never a link. */
+const isSafeUrl = (url?: string) =>
+  typeof url === "string" && /^https?:\/\//i.test(url);
+
+const contributors = [
+  { name: "Cgm._.97", url: "https://cgm-csie.me/" },
+  { name: "Denny", url: "https://denny.li" },
+  { name: "唐狗針", url: "https://kzzz.idv.tw/" },
+  { name: "mochaowo" },
+  { name: "cenny", url: "https://blog.sianqi.uk/" },
+];
+---
+
+<section class="contributors" id="contributors" data-anim-scope>
+  <div class="container head">
+    <h2>{t.title}</h2>
+    <p>{t.body}</p>
+  </div>
+
+  <div class="marquee">
+    <div class="track">
+      {[0, 1].map((copy) => (
+        <ul
+          class="half"
+          aria-label={copy === 0 ? t.listLabel : undefined}
+          aria-hidden={copy === 1 ? "true" : undefined}
+        >
+          {contributors.map((person) => (
+            <li>
+              {isSafeUrl(person.url) ? (
+                <a
+                  class="name link"
+                  href={person.url}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                  tabindex={copy === 1 ? -1 : undefined}
+                >
+                  {person.name}
+                </a>
+              ) : (
+                <span class="name">{person.name}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .contributors {
+    padding: 0 0 104px;
+    border-top: 1px solid var(--border-soft);
+    padding-top: 72px;
+  }
+  .head { margin-bottom: 34px; }
+  h2 {
+    margin: 0 0 10px;
+    font-size: clamp(24px, 3vw, 30px);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+  .head p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 15.5px;
+  }
+
+  .marquee {
+    position: relative;
+    overflow: hidden;
+    padding: 18px 0;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    /* Fade the two ends instead of drawing an overlay on top of the page. */
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  /* Two identical halves scroll by exactly one half-width, so the loop point
+     lands on the same layout it started from — no seam and no gap. Each half is
+     at least a viewport wide, so a short list still fills the band. */
+  .track {
+    display: flex;
+    width: max-content;
+    animation: marquee 34s linear infinite;
+  }
+  .half {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-around;
+    min-width: 100vw;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .half li {
+    display: flex;
+    align-items: center;
+    padding: 0 30px;
+    border-left: 1px solid var(--border-soft);
+  }
+  .name {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    white-space: nowrap;
+  }
+  /* Linked names read as links only on approach, so the band stays quiet. */
+  .link {
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 5px;
+    transition: color 0.15s ease, text-decoration-color 0.15s ease;
+  }
+  .link:hover,
+  .link:focus-visible {
+    color: var(--accent);
+    text-decoration-color: currentColor;
+  }
+  .link:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  /* Stop the band while someone is reaching for a name. */
+  /* Held only while a name has keyboard focus, so it can be activated. */
+  .marquee:focus-within .track { animation-play-state: paused; }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee { mask-image: none; }
+    .track { width: 100%; animation: none; }
+    .half { min-width: 0; flex-wrap: wrap; justify-content: center; }
+    /* The second half only exists to make the loop seamless. */
+    .half + .half { display: none; }
+  }
+
+  @media (max-width: 620px) {
+    .contributors { padding-top: 56px; padding-bottom: 72px; }
+    .track li { padding: 0 20px; }
+    .name { font-size: 15px; }
+  }
+</style>

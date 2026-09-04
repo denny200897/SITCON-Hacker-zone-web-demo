@@ -1,0 +1,93 @@
+---
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+import CodeBlock from "../../../components/docs/CodeBlock.astro";
+
+const toc = [
+  { id: "name", label: "NAME" },
+  { id: "synopsis", label: "SYNOPSIS" },
+  { id: "description", label: "DESCRIPTION" },
+  { id: "examples", label: "EXAMPLES" },
+  { id: "flags", label: "FLAGS" },
+  { id: "formats", label: "FORMATS" },
+  { id: "exit-status", label: "EXIT STATUS" },
+  { id: "see-also", label: "SEE ALSO" },
+];
+---
+
+<DocsLayout
+  title="aegis report"
+  description="Render stored scan results in another format, or compare them against a baseline."
+  breadcrumbs={[{ label: "CLI reference", href: "/docs/cli/" }, { label: "report" }]}
+  toc={toc}
+>
+  <h2 id="name">NAME</h2>
+  <p><code>aegis report</code> — format and summarize existing results.</p>
+
+  <h2 id="synopsis">SYNOPSIS</h2>
+  <CodeBlock title="synopsis">aegis report
+    [--input=PATH] [--format=FORMAT] [--output=PATH]
+    [--min-severity=SEVERITY] [--baseline=PATH] [--summary]
+    [GLOBAL_FLAGS ...]</CodeBlock>
+
+  <h2 id="description">DESCRIPTION</h2>
+  <p>
+    <code>aegis report</code> re-renders results that already exist, so a
+    single scan can produce several artifacts. Without <code>--input</code>, it
+    reads the last results stored in <code>.aegis/</code>.
+  </p>
+  <p>
+    With <code>--baseline</code>, the report contains only findings that are not
+    present in the baseline file, which is the usual way to report new risk
+    introduced by a change.
+  </p>
+
+  <h2 id="examples">EXAMPLES</h2>
+  <CodeBlock title="shell"># Markdown summary for a pull-request comment
+aegis report --format markdown --summary > comment.md
+
+# Convert a stored SARIF file to JSON
+aegis report --input aegis.sarif --format json --output aegis.json
+
+# Only findings that are new relative to main
+aegis report --baseline main.sarif --format text</CodeBlock>
+
+  <h2 id="flags">FLAGS</h2>
+  <dl>
+    <dt>--input=PATH</dt>
+    <dd>Result file to read. Defaults to the last stored results.</dd>
+    <dt>--format=text|json|sarif|markdown</dt>
+    <dd>Output format. Default is <code>text</code>.</dd>
+    <dt>--output=PATH</dt>
+    <dd>Write to <code>PATH</code> instead of stdout.</dd>
+    <dt>--min-severity=critical|high|medium|low</dt>
+    <dd>Omit findings below this severity.</dd>
+    <dt>--baseline=PATH</dt>
+    <dd>Report only findings absent from this file.</dd>
+    <dt>--summary</dt>
+    <dd>Emit counts per severity without the per-finding detail.</dd>
+  </dl>
+
+  <h2 id="formats">FORMATS</h2>
+  <table>
+    <thead><tr><th>Format</th><th>Use</th><th>Stability</th></tr></thead>
+    <tbody>
+      <tr><td><code>text</code></td><td>Terminals</td><td>Not a stable interface.</td></tr>
+      <tr><td><code>json</code></td><td>Custom tooling</td><td>Versioned schema.</td></tr>
+      <tr><td><code>sarif</code></td><td>Code-scanning dashboards</td><td>SARIF 2.1.0.</td></tr>
+      <tr><td><code>markdown</code></td><td>Pull-request comments</td><td>Rendering may change between releases.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="exit-status">EXIT STATUS</h2>
+  <p>
+    <code>0</code> on success, <code>2</code> when the input file cannot be
+    parsed. <code>aegis report</code> does not apply
+    <code>--fail-on</code> and never exits <code>1</code> because of findings.
+  </p>
+
+  <h2 id="see-also">SEE ALSO</h2>
+  <p>
+    <a href="/docs/cli/scan/">aegis scan</a>,
+    <a href="/docs/exit-codes/">Exit codes</a>.
+  </p>
+</DocsLayout>

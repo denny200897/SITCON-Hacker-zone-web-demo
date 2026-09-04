@@ -1,0 +1,91 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import CodeBlock from "../../components/docs/CodeBlock.astro";
+import Callout from "../../components/docs/Callout.astro";
+
+const toc = [
+  { id: "before-you-begin", label: "Before you begin" },
+  { id: "step-1", label: "1. Initialize the project" },
+  { id: "step-2", label: "2. Run your first scan" },
+  { id: "step-3", label: "3. Read the output" },
+  { id: "step-4", label: "4. Scan only a diff" },
+  { id: "step-5", label: "5. Export a report" },
+  { id: "next-steps", label: "Next steps" },
+];
+---
+
+<DocsLayout
+  title="Quickstart"
+  description="Scan a repository, read the findings, and export a report in about five minutes."
+  breadcrumbs={[{ label: "Quickstart" }]}
+  toc={toc}
+>
+  <h2 id="before-you-begin">Before you begin</h2>
+  <ol>
+    <li>Install the CLI. See <a href="/docs/install/">Install</a>.</li>
+    <li>Change into a Git repository you have permission to test.</li>
+    <li>Make sure the working tree builds — Aegis executes generated tests.</li>
+  </ol>
+
+  <h2 id="step-1">1. Initialize the project</h2>
+  <p>
+    <code>aegis init</code> detects the languages and frameworks in the
+    repository and writes a configuration file.
+  </p>
+  <CodeBlock title="shell">cd my-service
+aegis init</CodeBlock>
+  <CodeBlock title="output">Detected: TypeScript (express), PostgreSQL
+Wrote aegis.yml
+Wrote .aegis/ to .gitignore</CodeBlock>
+
+  <h2 id="step-2">2. Run your first scan</h2>
+  <CodeBlock title="shell">aegis scan</CodeBlock>
+  <p>
+    The scan reviews the repository, maps the attack surface, generates targeted
+    tests, and runs them. Progress is written to stderr so that stdout stays
+    usable in a pipeline.
+  </p>
+
+  <h2 id="step-3">3. Read the output</h2>
+  <CodeBlock title="output">! SQL Injection                                    Critical
+  Untrusted user input reaches database query
+  -> src/api/users.ts:84
+
+  Remediation: Use parameterized queries or an ORM.
+  View details: aegis://results/1
+
+Scan complete. 1 critical finding.</CodeBlock>
+  <p>Each finding contains four parts:</p>
+  <dl>
+    <dt>Class and severity</dt>
+    <dd>The vulnerability class, plus a severity of critical, high, medium, or low.</dd>
+    <dt>Location</dt>
+    <dd>The file and line where untrusted input reaches the sensitive operation.</dd>
+    <dt>Evidence</dt>
+    <dd>The generated test and the observed result that proved the finding.</dd>
+    <dt>Remediation</dt>
+    <dd>The recommended fix, tied to the framework detected in your project.</dd>
+  </dl>
+  <Callout type="note">
+    <p>
+      Only verified findings are reported by default. Add
+      <code>--include-unverified</code> to also see candidates that Aegis
+      could not reproduce.
+    </p>
+  </Callout>
+
+  <h2 id="step-4">4. Scan only a diff</h2>
+  <p>Scoping to a diff is the fastest way to run Aegis on every change.</p>
+  <CodeBlock title="shell">aegis scan --diff origin/main...HEAD</CodeBlock>
+
+  <h2 id="step-5">5. Export a report</h2>
+  <CodeBlock title="shell">aegis scan --format sarif --output aegis.sarif
+aegis report --input aegis.sarif --format markdown</CodeBlock>
+
+  <h2 id="next-steps">Next steps</h2>
+  <ul>
+    <li><a href="/docs/configuration/">Configuration</a> — tune scope, severity thresholds, and test execution.</li>
+    <li><a href="/docs/ci/">Continuous integration</a> — run scans on pull requests.</li>
+    <li><a href="/docs/cli/">CLI reference</a> — every command and flag.</li>
+  </ul>
+</DocsLayout>

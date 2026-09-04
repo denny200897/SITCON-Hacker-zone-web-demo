@@ -1,0 +1,78 @@
+---
+import Icons from "./Icons.astro";
+import { getLang } from "../i18n/ui";
+import { copy } from "../i18n/copy";
+
+const lang = getLang(Astro.url);
+const icons = ["scale", "laptop", "workflow", "shield-check"] as const;
+const features = copy[lang].features.map((feature, index) => ({
+  ...feature,
+  icon: icons[index],
+}));
+---
+
+<section class="strip-section" id="community">
+  <div class="container">
+    <ul class="strip">
+      {features.map((feature) => (
+        <li>
+          <span class="icon"><Icons name={feature.icon} size={30} /></span>
+          <h3>{feature.title}</h3>
+          <p>{feature.body}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .strip-section { padding: 0 0 104px; background: var(--bg-alt); }
+  .strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-panel);
+  }
+  /* The icon sits on its own line so the text can run at a readable size
+     instead of being squeezed into a narrow column beside it. */
+  .strip li { padding: 44px 36px 46px; }
+  .strip li + li { border-left: 1px solid var(--border-soft); }
+  .icon {
+    display: block;
+    margin-bottom: 26px;
+    color: var(--text-muted);
+  }
+  h3 {
+    margin: 0 0 12px;
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  p {
+    margin: 0;
+    max-width: 26ch;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.65;
+  }
+
+  @media (max-width: 1000px) {
+    .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .strip li { padding: 36px 30px 38px; }
+    .strip li + li { border-left: 0; }
+    .strip li:nth-child(even) { border-left: 1px solid var(--border-soft); }
+    .strip li:nth-child(n + 3) { border-top: 1px solid var(--border-soft); }
+  }
+  @media (max-width: 620px) {
+    .strip { grid-template-columns: 1fr; }
+    .strip li { padding: 30px 24px 32px; }
+    .icon { margin-bottom: 18px; }
+    p { max-width: none; }
+    .strip li:nth-child(even) { border-left: 0; }
+    .strip li + li { border-top: 1px solid var(--border-soft); }
+  }
+</style>

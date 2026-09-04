@@ -1,0 +1,100 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import CodeBlock from "../../components/docs/CodeBlock.astro";
+import { docsNav } from "../../data/docs-nav";
+
+const toc = [
+  { id: "what-it-does", label: "What Aegis does" },
+  { id: "how-a-scan-works", label: "How a scan works" },
+  { id: "install-it", label: "Install it" },
+  { id: "documentation-map", label: "Documentation map" },
+  { id: "conventions", label: "Conventions" },
+];
+---
+
+<DocsLayout
+  title="Aegis documentation"
+  description="Aegis reviews a repository, derives its attack surface, tests that surface, and reports only the findings it could verify."
+  toc={toc}
+>
+  <h2 id="what-it-does">What Aegis does</h2>
+  <p>
+    Aegis is a command-line tool that runs on a checkout of your repository.
+    It reads code changes, data flows, and dependencies, generates security
+    tests against the entry points it finds, executes those tests, and reports
+    the findings that it was able to reproduce.
+  </p>
+  <p>
+    Everything runs locally by default. No source code leaves the machine unless
+    you explicitly configure a remote ruleset or reporting destination.
+  </p>
+
+  <h2 id="how-a-scan-works">How a scan works</h2>
+  <ol>
+    <li>
+      <strong>Review.</strong> Aegis parses the working tree (or a diff
+      range) and builds a model of routes, handlers, queries, and dependencies.
+    </li>
+    <li>
+      <strong>Map.</strong> Entry points and data flows are resolved into an
+      attack surface — the set of places untrusted input can reach sensitive
+      operations.
+    </li>
+    <li>
+      <strong>Test.</strong> Targeted tests are generated per candidate finding
+      and executed against that surface.
+    </li>
+    <li>
+      <strong>Report.</strong> Findings are emitted with a severity, a source
+      location, the evidence that proved them, and a remediation.
+    </li>
+  </ol>
+
+  <h2 id="install-it">Install it</h2>
+  <CodeBlock title="shell">curl -fsSL aegis.dev/install | sh
+aegis --version</CodeBlock>
+  <p>
+    See <a href="/docs/install/">Install</a> for package managers, pinned
+    versions, and offline installation.
+  </p>
+
+  <h2 id="documentation-map">Documentation map</h2>
+  <table>
+    <thead>
+      <tr><th>Section</th><th>Contents</th></tr>
+    </thead>
+    <tbody>
+      {docsNav.map((section) => (
+        <tr>
+          <td><strong>{section.title}</strong></td>
+          <td>
+            {section.links.map((link, i) => (
+              <>
+                {i > 0 && ", "}
+                <a href={link.href}>{link.label}</a>
+              </>
+            ))}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <h2 id="conventions">Conventions</h2>
+  <p>Throughout this documentation:</p>
+  <ul>
+    <li>Text in <code>code font</code> is typed literally.</li>
+    <li>
+      Text in <code>ITALIC_CAPS</code> is a placeholder you replace, such as
+      <code>PATH</code> or <code>FORMAT</code>.
+    </li>
+    <li>
+      Square brackets mark optional arguments: <code>aegis scan [PATH]</code>.
+    </li>
+    <li>
+      A vertical bar separates alternatives:
+      <code>--format=json|sarif|text</code>.
+    </li>
+    <li>An ellipsis marks a repeatable argument: <code>PATH ...</code>.</li>
+  </ul>
+</DocsLayout>

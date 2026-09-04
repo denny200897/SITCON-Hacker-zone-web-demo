@@ -1,0 +1,43 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import CodeBlock from "../../components/docs/CodeBlock.astro";
+
+const toc = [
+  { id: "codes", label: "Status codes" },
+  { id: "usage", label: "Using exit codes in scripts" },
+];
+
+const exitCodeExample = `set -e
+aegis scan --format sarif --output aegis.sarif || status=$?
+
+case "\${status:-0}" in
+  0) echo "clean" ;;
+  1) echo "findings above threshold"; exit 1 ;;
+  4) echo "test harness failed to start"; exit 1 ;;
+  *) echo "aegis failed with status \${status}"; exit 1 ;;
+esac`;
+---
+
+<DocsLayout
+  title="Exit codes"
+  description="Every Aegis command reports its outcome through the process exit status."
+  breadcrumbs={[{ label: "Exit codes" }]}
+  toc={toc}
+>
+  <h2 id="codes">Status codes</h2>
+  <table>
+    <thead><tr><th>Code</th><th>Meaning</th><th>Typical cause</th></tr></thead>
+    <tbody>
+      <tr><td><code>0</code></td><td>Success</td><td>The command completed and no finding met the <code>--fail-on</code> threshold.</td></tr>
+      <tr><td><code>1</code></td><td>Findings above threshold</td><td>At least one verified finding met or exceeded <code>--fail-on</code>.</td></tr>
+      <tr><td><code>2</code></td><td>Usage error</td><td>An unknown flag, a missing argument, or an invalid value.</td></tr>
+      <tr><td><code>3</code></td><td>Configuration error</td><td><code>aegis.yml</code> is malformed or references an unknown rule pack.</td></tr>
+      <tr><td><code>4</code></td><td>Test execution failure</td><td>The application under test could not be started, or every test timed out.</td></tr>
+      <tr><td><code>5</code></td><td>Rules unavailable</td><td>The rules source could not be reached and no cached copy exists.</td></tr>
+      <tr><td><code>130</code></td><td>Interrupted</td><td>The command received SIGINT.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="usage">Using exit codes in scripts</h2>
+  <CodeBlock title="shell" copy={exitCodeExample}>{exitCodeExample}</CodeBlock>
+</DocsLayout>

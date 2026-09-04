@@ -1,0 +1,99 @@
+---
+import DocsLayout from "../../layouts/DocsLayout.astro";
+import CodeBlock from "../../components/docs/CodeBlock.astro";
+import Callout from "../../components/docs/Callout.astro";
+
+const toc = [
+  { id: "requirements", label: "Requirements" },
+  { id: "install-script", label: "Install script" },
+  { id: "package-managers", label: "Package managers" },
+  { id: "pinned-versions", label: "Pinned versions" },
+  { id: "offline", label: "Offline installation" },
+  { id: "verify", label: "Verify the installation" },
+  { id: "upgrade-remove", label: "Upgrade and remove" },
+];
+---
+
+<DocsLayout
+  title="Install"
+  description="Install the Aegis CLI on macOS, Linux, or Windows (WSL)."
+  breadcrumbs={[{ label: "Install" }]}
+  toc={toc}
+>
+  <h2 id="requirements">Requirements</h2>
+  <table>
+    <thead><tr><th>Requirement</th><th>Minimum</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Operating system</td><td>macOS 13, Ubuntu 20.04, Windows 11 + WSL2</td><td>x86-64 and arm64 builds are published.</td></tr>
+      <tr><td>Git</td><td>2.30</td><td>Required for diff-scoped scans.</td></tr>
+      <tr><td>Shell</td><td>bash, zsh, or fish</td><td>Needed by the install script only.</td></tr>
+      <tr><td>Disk</td><td>250 MB</td><td>Binary plus the local rules cache.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="install-script">Install script</h2>
+  <p>The install script detects your platform and installs the latest release into <code>~/.aegis/bin</code>.</p>
+  <CodeBlock title="shell">curl -fsSL aegis.dev/install | sh</CodeBlock>
+  <p>
+    To review the script before running it, download it first:
+  </p>
+  <CodeBlock title="shell">curl -fsSL -o install.sh aegis.dev/install
+less install.sh
+sh install.sh</CodeBlock>
+  <p>
+    Add the install directory to your <code>PATH</code> if the installer could
+    not update your shell profile:
+  </p>
+  <CodeBlock title="~/.zshrc">export PATH="$HOME/.aegis/bin:$PATH"</CodeBlock>
+
+  <h2 id="package-managers">Package managers</h2>
+  <CodeBlock title="shell"># macOS and Linux (Homebrew)
+brew install aegis/tap/aegis
+
+# Debian and Ubuntu
+sudo apt-get install ./aegis_1.8.2_amd64.deb
+
+# Any platform with Node.js 20+
+npx @aegis/cli --version</CodeBlock>
+
+  <h2 id="pinned-versions">Pinned versions</h2>
+  <p>
+    Pin a version in automation so a new release cannot change your results
+    mid-pipeline. The install script accepts <code>AEGIS_VERSION</code>.
+  </p>
+  <CodeBlock title="shell">curl -fsSL aegis.dev/install | AEGIS_VERSION=1.8.2 sh</CodeBlock>
+
+  <h2 id="offline">Offline installation</h2>
+  <p>
+    Download the release archive and its checksum on a connected machine, then
+    move both to the target host.
+  </p>
+  <CodeBlock title="shell">curl -fsSLO https://github.com/aegis/aegis/releases/download/v1.8.2/aegis_1.8.2_linux_amd64.tar.gz
+curl -fsSLO https://github.com/aegis/aegis/releases/download/v1.8.2/checksums.txt
+sha256sum --check --ignore-missing checksums.txt
+tar -xzf aegis_1.8.2_linux_amd64.tar.gz -C /usr/local/bin aegis</CodeBlock>
+  <Callout type="warning" title="Air-gapped hosts">
+    <p>
+      Rule packs are not bundled with the binary. Mirror them with
+      <code>aegis rules export</code> on a connected machine and point
+      <code>rules.source</code> at the mirrored directory. See
+      <a href="/docs/rulesets/">Rulesets</a>.
+    </p>
+  </Callout>
+
+  <h2 id="verify">Verify the installation</h2>
+  <CodeBlock title="shell">aegis --version
+aegis doctor</CodeBlock>
+  <p>
+    <code>aegis doctor</code> checks the Git version, write access to the
+    cache directory, and reachability of the configured rules source. It exits
+    with <code>0</code> when every check passes.
+  </p>
+
+  <h2 id="upgrade-remove">Upgrade and remove</h2>
+  <CodeBlock title="shell"># Upgrade in place
+aegis upgrade
+
+# Remove the binary, cache, and shell profile entry
+aegis uninstall</CodeBlock>
+</DocsLayout>

@@ -1,0 +1,101 @@
+---
+import DocsLayout from "../../../layouts/DocsLayout.astro";
+import CodeBlock from "../../../components/docs/CodeBlock.astro";
+
+const toc = [
+  { id: "name", label: "NAME" },
+  { id: "synopsis", label: "SYNOPSIS" },
+  { id: "description", label: "DESCRIPTION" },
+  { id: "commands", label: "COMMANDS" },
+  { id: "global-flags", label: "GLOBAL FLAGS" },
+  { id: "environment", label: "ENVIRONMENT" },
+  { id: "files", label: "FILES" },
+  { id: "exit-status", label: "EXIT STATUS" },
+];
+---
+
+<DocsLayout
+  title="aegis"
+  description="Top-level command group for the Aegis CLI."
+  breadcrumbs={[{ label: "CLI reference", href: "/docs/cli/" }, { label: "aegis" }]}
+  toc={toc}
+>
+  <h2 id="name">NAME</h2>
+  <p><code>aegis</code> — review code, verify vulnerabilities, and report findings.</p>
+
+  <h2 id="synopsis">SYNOPSIS</h2>
+  <CodeBlock title="synopsis">aegis COMMAND [ARGUMENTS ...] [FLAGS ...]
+aegis --version
+aegis help [COMMAND]</CodeBlock>
+
+  <h2 id="description">DESCRIPTION</h2>
+  <p>
+    <code>aegis</code> is the entry point for every Aegis operation. It
+    operates on a Git working tree and runs entirely on the local machine unless
+    a remote rules source or reporting destination is configured.
+  </p>
+  <p>
+    Commands read configuration from <code>aegis.yml</code> in the
+    repository root. Flags override configuration values; see
+    <a href="/docs/configuration/">Configuration</a> for precedence.
+  </p>
+
+  <h2 id="commands">COMMANDS</h2>
+  <table>
+    <thead><tr><th>Command</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><a href="/docs/cli/init/"><code>init</code></a></td><td>Detect the project stack and write a configuration file.</td></tr>
+      <tr><td><a href="/docs/cli/scan/"><code>scan</code></a></td><td>Review, map, test, and report in one pass.</td></tr>
+      <tr><td><a href="/docs/cli/test/"><code>test</code></a></td><td>Execute generated tests against an existing analysis.</td></tr>
+      <tr><td><a href="/docs/cli/report/"><code>report</code></a></td><td>Render stored results in another format.</td></tr>
+      <tr><td><code>rules</code></td><td>List, validate, export, and update rule packs.</td></tr>
+      <tr><td><code>config</code></td><td>Print or validate the effective configuration.</td></tr>
+      <tr><td><code>doctor</code></td><td>Check the local environment and report problems.</td></tr>
+      <tr><td><code>upgrade</code></td><td>Install the latest release in place.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="global-flags">GLOBAL FLAGS</h2>
+  <p>These flags are accepted by every command.</p>
+  <dl>
+    <dt>--config=PATH</dt>
+    <dd>Load configuration from <code>PATH</code> instead of <code>aegis.yml</code>.</dd>
+    <dt>--verbose, -v</dt>
+    <dd>Write the analysis plan, generated tests, and per-test results to stderr.</dd>
+    <dt>--quiet, -q</dt>
+    <dd>Suppress progress output. Findings and errors are still printed.</dd>
+    <dt>--log-file=PATH</dt>
+    <dd>Append structured logs to <code>PATH</code>. Values matching the <code>secrets</code> pack are redacted.</dd>
+    <dt>--no-color</dt>
+    <dd>Disable ANSI color. Applied automatically when stdout is not a terminal.</dd>
+    <dt>--cache-dir=PATH</dt>
+    <dd>Override the cache location. Default is <code>~/.cache/aegis</code>.</dd>
+    <dt>--version</dt>
+    <dd>Print the version, commit, and build date, then exit.</dd>
+    <dt>--help, -h</dt>
+    <dd>Print help for the command, then exit.</dd>
+  </dl>
+
+  <h2 id="environment">ENVIRONMENT</h2>
+  <p>
+    <code>AEGIS_CONFIG</code>, <code>AEGIS_FORMAT</code>,
+    <code>AEGIS_FAIL_ON</code>, <code>AEGIS_CACHE_DIR</code>,
+    <code>AEGIS_NO_COLOR</code>, and <code>AEGIS_TOKEN</code> are
+    described in <a href="/docs/configuration/#environment">Configuration</a>.
+  </p>
+
+  <h2 id="files">FILES</h2>
+  <dl>
+    <dt>aegis.yml</dt>
+    <dd>Project configuration, read from the repository root.</dd>
+    <dt>.aegis/</dt>
+    <dd>Per-repository state: the last analysis, generated tests, and stored results.</dd>
+    <dt>~/.config/aegis/config.yml</dt>
+    <dd>User-level defaults applied to every project.</dd>
+    <dt>~/.cache/aegis/</dt>
+    <dd>Downloaded rule packs and reusable analysis artifacts.</dd>
+  </dl>
+
+  <h2 id="exit-status">EXIT STATUS</h2>
+  <p>See <a href="/docs/exit-codes/">Exit codes</a>.</p>
+</DocsLayout>

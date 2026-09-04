@@ -1,0 +1,101 @@
+---
+import Icons from "../Icons.astro";
+
+interface Props {
+  /** Optional file name or context shown in the block header. */
+  title?: string;
+  /** Text placed on the clipboard; defaults to the rendered content. */
+  copy?: string;
+  lang?: string;
+}
+
+const { title, copy, lang } = Astro.props;
+const raw = await Astro.slots.render("default");
+const plain = raw
+  .replace(/<[^>]+>/g, "")
+  .replace(/&lt;/g, "<")
+  .replace(/&gt;/g, ">")
+  .replace(/&quot;/g, '"')
+  .replace(/&#39;/g, "'")
+  .replace(/&amp;/g, "&")
+  .trim();
+---
+
+<figure class="block">
+  <figcaption>
+    <span class="name">{title ?? lang ?? "shell"}</span>
+    <button type="button" class="copy" data-copy={copy ?? plain} aria-label="Copy code">
+      <Icons name="copy" size={16} />
+      <span>Copy</span>
+    </button>
+  </figcaption>
+  <pre><code><slot /></code></pre>
+</figure>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>(".block .copy").forEach((button) => {
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy ?? "");
+        button.classList.add("copied");
+        button.setAttribute("aria-label", "Code copied");
+        const label = button.querySelector("span");
+        if (label) label.textContent = "Copied";
+        setTimeout(() => {
+          button.classList.remove("copied");
+          button.setAttribute("aria-label", "Copy code");
+          if (label) label.textContent = "Copy";
+        }, 1400);
+      } catch {
+        /* clipboard unavailable */
+      }
+    });
+  });
+</script>
+
+<style>
+  .block {
+    margin: 0 0 22px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-terminal);
+    overflow: hidden;
+  }
+  figcaption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px 9px 16px;
+    border-bottom: 1px solid var(--border-soft);
+    background: #0c1119;
+  }
+  .name {
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+  }
+  .copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 7px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .copy:hover { color: var(--text); background: #161d28; }
+  .copy.copied { color: var(--green); }
+  pre {
+    margin: 0;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: #cdd9e8;
+    white-space: pre;
+  }
+</style>

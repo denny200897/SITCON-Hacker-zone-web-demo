@@ -1,0 +1,174 @@
+---
+const steps = [
+  {
+    title: "Reviewing repository...",
+    detail: "Analyzing code changes, data flows, and dependencies",
+  },
+  {
+    title: "Mapping attack surface...",
+    detail: "Identified 18 entry points and 43 data flows",
+  },
+  {
+    title: "Generating tests...",
+    detail: "Creating 27 targeted security tests",
+  },
+];
+
+const code = [
+  { n: 82, text: "const id = req.query.id;" },
+  { n: 83, text: "const sql = `SELECT * FROM users WHERE id = ${id}`;" },
+  { n: 84, text: "db.query(sql, (err, rows) => {", flagged: true },
+  { n: 85, text: "  ..." },
+];
+---
+
+<div class="term">
+  <div class="term-bar">
+    <span class="dots"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+    <span class="term-title">aegis scan</span>
+  </div>
+
+  <div class="term-body">
+    <p class="cmd"><span class="prompt">$</span> aegis scan</p>
+
+    <ul class="steps">
+      {steps.map((step) => (
+        <li>
+          <span class="arrow">&rarr;</span>
+          <span class="step-text">
+            <span class="step-title">{step.title}</span>
+            <span class="step-detail">{step.detail}</span>
+          </span>
+          <span class="check" aria-label="done">&#10003;</span>
+        </li>
+      ))}
+    </ul>
+
+    <div class="finding">
+      <div class="finding-head">
+        <span class="bang">!</span>
+        <span class="finding-name">SQL Injection</span>
+        <span class="sev">Critical</span>
+      </div>
+      <p class="finding-desc">Untrusted user input reaches database query</p>
+      <p class="finding-path"><span class="arrow">&rarr;</span> src/api/users.ts:84</p>
+
+      <pre class="code"><code>{code.map((line) => (
+        <span class:list={["code-line", line.flagged && "flagged"]}><span class="ln">{line.n}</span>{line.text}
+</span>
+      ))}</code></pre>
+
+      <p class="remediation">
+        <span class="label">Remediation:</span> Use parameterized queries or an ORM.
+      </p>
+      <p class="details">
+        View details: <a href="#docs">aegis://results/1</a>
+      </p>
+    </div>
+
+    <p class="summary">Scan complete. <span class="crit">1 critical finding</span>.</p>
+  </div>
+</div>
+
+<style>
+  .term {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-terminal);
+    overflow: hidden;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.65;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55);
+  }
+  .term-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 14px;
+    background: var(--bg-chrome);
+    border-bottom: 1px solid var(--border);
+  }
+  .dots { display: flex; gap: 7px; }
+  .dots i { width: 11px; height: 11px; border-radius: 50%; }
+  .dots .r { background: #ff5f57; }
+  .dots .y { background: #febc2e; }
+  .dots .g { background: #28c840; }
+  .term-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-muted);
+    font-size: 12.5px;
+  }
+
+  .term-body { padding: 18px 20px 22px; }
+  .cmd { margin: 0 0 14px; color: var(--text); }
+  .prompt { color: var(--accent); margin-right: 8px; }
+
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-soft);
+  }
+  .arrow { color: var(--accent); }
+  .step-text { display: flex; flex-direction: column; flex: 1; }
+  .step-title { color: var(--text); }
+  .step-detail { color: var(--text-dim); font-size: 12.5px; }
+  .check { color: var(--green); }
+
+  .finding { padding-top: 16px; }
+  .finding-head { display: flex; align-items: center; gap: 10px; }
+  .bang { color: var(--red); font-weight: 700; }
+  .finding-name { color: var(--red); font-weight: 700; font-size: 15px; }
+  .sev {
+    margin-left: auto;
+    padding: 2px 10px;
+    border: 1px solid rgba(242, 85, 90, 0.5);
+    border-radius: 5px;
+    color: var(--red);
+    font-size: 12px;
+  }
+  .finding-desc { margin: 8px 0 4px; color: var(--text-muted); }
+  .finding-path { margin: 0 0 12px; color: var(--accent); }
+
+  .code {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    background: #070a0f;
+    border: 1px solid var(--border-soft);
+    border-radius: 8px;
+    overflow-x: auto;
+    color: #c8d3e2;
+    font-size: 12.5px;
+  }
+  .code-line { display: block; white-space: pre; }
+  .ln {
+    display: inline-block;
+    width: 34px;
+    color: var(--text-dim);
+    user-select: none;
+  }
+  .flagged .ln { color: var(--red); }
+
+  .remediation { margin: 0 0 6px; color: var(--text-muted); }
+  .remediation .label { color: var(--green); }
+  .details { margin: 0 0 16px; color: var(--text-muted); }
+  .details a { color: var(--accent); text-decoration: underline; }
+  .summary {
+    margin: 0;
+    padding-top: 14px;
+    border-top: 1px dashed var(--border-soft);
+    color: var(--text-muted);
+  }
+  .crit { color: var(--red); }
+
+  @media (max-width: 520px) {
+    .term { font-size: 12px; }
+    .term-body { padding: 14px; }
+  }
+</style>
