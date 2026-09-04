@@ -65,8 +65,8 @@ src/
 └── styles/global.css        # 設計變數、共用元件、效能規則
 public/
 ├── favicon.svg
-├── assets/
-└── _headers                 # 部署用安全性標頭
+└── assets/
+vercel.json                  # 部署設定與安全性標頭
 ```
 
 ## 多語言
@@ -121,7 +121,7 @@ public/
 - 不使用 `innerHTML`、`eval`、`set:html` 等注入面；動態文字一律走 `textContent`
 - 外部連結使用 `rel="noopener noreferrer"`
 - 開發者名單的連結經 `isSafeUrl()` 檢查，只有 `http(s)://` 會渲染成連結
-- `public/_headers` 提供 CSP、HSTS、`nosniff`、`frame-ancestors 'none'`、`Referrer-Policy`、`Permissions-Policy`（Netlify／Cloudflare Pages 格式；Vercel 請改用 `vercel.json`，nginx 請用 `add_header`）
+- `vercel.json` 提供 CSP、HSTS、`nosniff`、`frame-ancestors 'none'`、`Referrer-Policy`、`Permissions-Policy`、`Cross-Origin-Opener-Policy`
 
 已知可再強化：CSP 目前含 `script-src 'unsafe-inline'`，因為 Astro 會內嵌 `define:vars` 產生的小型 script；若要移除，需改以 `<script type="application/json">` 傳遞資料。字型改為自架也能移除對 Google 的第三方請求。
 
@@ -133,9 +133,19 @@ public/
 npm run build
 ```
 
-- Netlify / Cloudflare Pages：build command `npm run build`，publish directory `dist`，`_headers` 會自動生效
-- Vercel：需另外以 `vercel.json` 設定標頭
-- 部署前請確認 `astro.config.mjs` 的 `site` 已改為實際網域
+部署平台為 **Vercel**，設定集中在 `vercel.json`：build command、輸出目錄與所有回應標頭。推送到 `main` 即自動部署。
+
+部署前請確認 `astro.config.mjs` 的 `site` 已改為實際網域（目前是 `https://aegis.dev`），它會影響 sitemap 與絕對網址。
+
+### 強制 HTTPS
+
+1. **傳輸層**：Vercel 不以明文提供服務，對 HTTP 請求一律回 308 導向 HTTPS，憑證自動簽發與續期，這一層不需要設定
+2. **HSTS**：`vercel.json` 送出 `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`，瀏覽器在兩年內只會以 HTTPS 連線，連導向那一跳都省下。網域穩定後可送交 [hstspreload.org](https://hstspreload.org) 進入瀏覽器預載名單
+3. **CSP `upgrade-insecure-requests`**：任何漏網的 http 子資源會自動改以 https 請求
+
+站內所有資源皆為 https 或同源相對路徑，沒有混合內容。刻意不使用 JavaScript 轉址：它保護不了第一個請求，而且會讓 `http://localhost` 的本機開發無法運作。
+
+若之後要把 `www` 併進主網域，在 Vercel 專案的 Domains 加入 `www.<網域>` 並設為 redirect 即可，不需要改 repo。
 
 ## 開發者
 
