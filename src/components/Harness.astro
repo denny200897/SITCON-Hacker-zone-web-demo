@@ -13,6 +13,8 @@ const banner = String.raw` █████╗ ███████╗ ███
 ██║  ██║███████╗╚██████╔╝██║███████║
 ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝╚══════╝`;
 
+const bannerLines = banner.split("\n");
+
 /**
  * Only the commands the interface itself advertises. Each response is what the
  * program prints; nothing here is invented beyond that.
@@ -38,7 +40,10 @@ const responses = {
     <p class="lede">{t.body}</p>
 
     <div class="screen" data-screen>
-      <pre class="banner" aria-label="AEGIS">{banner}</pre>
+      <pre class="banner" aria-label="AEGIS">{bannerLines.map((line, index) => (
+        <span class="banner-line" style={`--row: ${index}`}>{line}
+</span>
+      ))}</pre>
 
       <p class="subtitle">Code Security Review Agent Harness</p>
       <p class="boot">Type /help for commands &middot; Enter to send &middot; Ctrl+C to exit</p>
@@ -56,6 +61,7 @@ const responses = {
           spellcheck="false"
           aria-label={t.placeholder}
         />
+        <span class="blink" aria-hidden="true"></span>
       </label>
 
       <p class="status">/help commands &middot; /lang zh 中文 &middot; ↑↓/PgUp scroll &middot; Ctrl+C exit</p>
@@ -82,9 +88,11 @@ const responses = {
     const history = [];
     let historyIndex = 0;
 
-    const write = (text, tone) => {
+    const write = (text, tone, order = 0) => {
       const line = document.createElement("p");
       line.className = `line ${tone ?? ""}`.trim();
+      // Lines land in sequence, the way a program prints them.
+      line.style.animationDelay = `${order * 55}ms`;
       // textContent only: whatever is typed is data, never markup.
       line.textContent = text;
       log.append(line);
@@ -101,10 +109,10 @@ const responses = {
 
       const reply = responses[command.toLowerCase()];
       if (reply) {
-        reply.forEach((entry) => write(entry.text, entry.tone));
+        reply.forEach((entry, index) => write(entry.text, entry.tone, index + 1));
       } else {
-        write(`unknown command: ${command}`, "error");
-        write("type /help for the list", "dim");
+        write(`unknown command: ${command}`, "error", 1);
+        write("type /help for the list", "dim", 2);
       }
     };
 
@@ -135,6 +143,23 @@ const responses = {
         input.value = "";
       });
     });
+
+    // The screen boots the first time it is scrolled into view.
+    if ("IntersectionObserver" in window) {
+      const boot = new IntersectionObserver(
+        (entries, observer) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add("booted");
+            observer.unobserve(entry.target);
+          }
+        },
+        { threshold: 0.25 }
+      );
+      boot.observe(screen);
+    } else {
+      screen.classList.add("booted");
+    }
 
     // Clicking anywhere on the screen puts the caret in the prompt, like a TUI.
     screen.addEventListener("click", (event) => {
@@ -174,6 +199,7 @@ const responses = {
   }
   .banner {
     margin: 0 0 14px;
+    display: block;
     overflow-x: auto;
     font-size: clamp(7px, 1.15vw, 12px);
     line-height: 1.05;
@@ -253,5 +279,68 @@ const responses = {
     .harness { padding: 64px 0; }
     .screen { padding: 18px 16px 14px; font-size: 12px; }
     .log { min-height: 132px; }
+  }
+  /* --- Motion ------------------------------------------------------------
+     A boot sequence on first view, a resting cursor, and output that prints
+     in sequence. transform/opacity only. */
+
+  .banner-line,
+  .subtitle,
+  .boot,
+  .prompt,
+  .status {
+    opacity: 0;
+  }
+  .booted .banner-line {
+    animation: boot-line 0.34s ease forwards;
+    animation-delay: calc(var(--row) * 90ms);
+  }
+  .booted .subtitle { animation: boot-line 0.34s ease 0.58s forwards; }
+  .booted .boot { animation: boot-line 0.34s ease 0.68s forwards; }
+  .booted .prompt { animation: boot-line 0.34s ease 0.8s forwards; }
+  .booted .status { animation: boot-line 0.34s ease 0.9s forwards; }
+
+  .banner-line { display: block; }
+
+  /* A block cursor rests at the prompt while nothing is typed. */
+  .blink {
+    width: 8px;
+    height: 1.05em;
+    flex: 0 0 auto;
+    background: var(--accent);
+    opacity: 0;
+  }
+  input:placeholder-shown ~ .blink {
+    animation: cursor-blink 1.06s steps(2, start) infinite;
+  }
+  .prompt:focus-within .blink { animation: none; opacity: 0; }
+
+  .log :global(.line) { animation: print-line 0.22s ease both; }
+
+  @keyframes boot-line {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes cursor-blink {
+    0% { opacity: 0.9; }
+    50% { opacity: 0; }
+    100% { opacity: 0.9; }
+  }
+  @keyframes print-line {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* No script, or no motion wanted: everything is simply visible. */
+  @media (prefers-reduced-motion: reduce), (scripting: none) {
+    .banner-line,
+    .subtitle,
+    .boot,
+    .prompt,
+    .status {
+      opacity: 1;
+      animation: none;
+    }
+    .blink { display: none; }
   }
 </style>
