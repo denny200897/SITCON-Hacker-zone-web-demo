@@ -32,6 +32,14 @@ export const copy = {
       installLabel: "Install command",
       note: "Supports macOS, Linux, and Windows (WSL). Requires Git and a supported shell.",
     },
+    harness: {
+      title: "The harness, as it runs",
+      body: "Aegis is a terminal program. This is the screen you get after installing it — the banner, the prompt, and the commands it accepts.",
+      hint: "Try a command below, or click one of the suggestions.",
+      placeholder: "Type a command or /help …",
+      suggestions: ["/help", "/lang zh", "/lang en"],
+      note: "A replica of the real interface. Nothing is sent anywhere; the responses are the program's own.",
+    },
     steps: {
       title: "From review to verified risk",
       switcher: "Aegis workflow stages",
@@ -172,6 +180,14 @@ export const copy = {
       copy: "複製安裝指令",
       installLabel: "安裝指令",
       note: "支援 macOS、Linux 與 Windows (WSL)，需要 Git 與支援的 shell。",
+    },
+    harness: {
+      title: "實際執行的畫面",
+      body: "Aegis 是一個終端機程式。安裝完成後看到的就是這個畫面：橫幅、輸入提示，以及它接受的指令。",
+      hint: "可以在下面輸入指令，或直接點選建議。",
+      placeholder: "Type a command or /help …",
+      suggestions: ["/help", "/lang zh", "/lang en"],
+      note: "這是實際介面的重現。輸入不會送到任何地方，回應就是程式本身的輸出。",
     },
     steps: {
       title: "從審查到已驗證的風險",
