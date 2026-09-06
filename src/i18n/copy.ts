@@ -148,7 +148,7 @@ export const copy = {
         {
           title: "Community",
           links: [
-            { label: "GitHub", href: "https://github.com/aegis/aegis" },
+            { label: "GitHub", href: "https://github.com/denny200897/SITCON-hacker-zone" },
             { label: "Contributors", href: "#contributors" },
             { label: "Security policy", href: "/docs/troubleshooting/" },
           ],
@@ -300,7 +300,7 @@ export const copy = {
         {
           title: "社群",
           links: [
-            { label: "GitHub", href: "https://github.com/aegis/aegis" },
+            { label: "GitHub", href: "https://github.com/denny200897/SITCON-hacker-zone" },
             { label: "開發者名單", href: "#contributors" },
             { label: "安全政策", href: "/docs/troubleshooting/" },
           ],
