@@ -24,7 +24,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install Aegis
-        run: curl -fsSL aegis.dev/install | sh
+        run: curl -fsSL https://denny.li/install.sh | sh
       - name: Run scan
         run: aegis scan --diff origin/\${{ github.base_ref }}...HEAD --format sarif --output aegis.sarif
       - name: Upload results
@@ -39,7 +39,7 @@ const githubCache = `      - uses: actions/cache@v4
 
 const jenkinsPipeline = `stage('Aegis') {
   steps {
-    sh 'curl -fsSL aegis.dev/install | sh'
+    sh 'curl -fsSL https://denny.li/install.sh | sh'
     sh 'aegis scan --format sarif --output aegis.sarif'
   }
   post {
@@ -67,7 +67,7 @@ const jenkinsPipeline = `stage('Aegis') {
   <CodeBlock title=".gitlab-ci.yml">aegis:
   stage: test
   script:
-    - curl -fsSL aegis.dev/install | sh
+    - curl -fsSL https://denny.li/install.sh | sh
     - aegis scan --diff origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME...HEAD --format sarif --output aegis.sarif
   artifacts:
     when: always

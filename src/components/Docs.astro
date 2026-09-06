@@ -17,7 +17,7 @@ const lines: Token[][] = [
   [{ t: "      - ", c: "dash" }, { t: "uses", c: "key" }, { t: ": actions/checkout@v4" }],
   [{ t: "        with", c: "key" }, { t: ": { fetch-depth: 0 }" }],
   [{ t: "      - ", c: "dash" }, { t: "name", c: "key" }, { t: ": Install Aegis CLI" }],
-  [{ t: "        run", c: "key" }, { t: ": curl -fsSL aegis.dev/install | sh" }],
+  [{ t: "        run", c: "key" }, { t: ": curl -fsSL https://denny.li/install.sh | sh" }],
   [{ t: "      - ", c: "dash" }, { t: "name", c: "key" }, { t: ": Review and verify" }],
   [{ t: "        run", c: "key" }, { t: ": aegis scan --diff origin/main...HEAD \\" }],
   [{ t: "            --format sarif --output aegis.sarif" }],

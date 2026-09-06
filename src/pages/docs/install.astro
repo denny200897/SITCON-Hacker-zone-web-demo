@@ -33,13 +33,23 @@ const toc = [
 
   <h2 id="install-script">Install script</h2>
   <p>The install script detects your platform and installs the latest release into <code>~/.aegis/bin</code>.</p>
-  <CodeBlock title="shell">curl -fsSL aegis.dev/install | sh</CodeBlock>
+
+  <h3>macOS and Linux</h3>
+  <CodeBlock title="shell">curl -fsSL https://denny.li/install.sh | sh</CodeBlock>
+
+  <h3>Windows</h3>
+  <CodeBlock title="powershell">irm https://denny.li/install.ps1 | iex</CodeBlock>
+  <h3>Reviewing the script first</h3>
   <p>
-    To review the script before running it, download it first:
+    Both one-liners pipe a script straight into a shell. To read it before it
+    runs, download it first:
   </p>
-  <CodeBlock title="shell">curl -fsSL -o install.sh aegis.dev/install
+  <CodeBlock title="shell">curl -fsSL -o install.sh https://denny.li/install.sh
 less install.sh
 sh install.sh</CodeBlock>
+  <CodeBlock title="powershell">irm https://denny.li/install.ps1 -OutFile install.ps1
+Get-Content install.ps1
+.\install.ps1</CodeBlock>
   <p>
     Add the install directory to your <code>PATH</code> if the installer could
     not update your shell profile:
@@ -61,7 +71,7 @@ npx @aegis/cli --version</CodeBlock>
     Pin a version in automation so a new release cannot change your results
     mid-pipeline. The install script accepts <code>AEGIS_VERSION</code>.
   </p>
-  <CodeBlock title="shell">curl -fsSL aegis.dev/install | AEGIS_VERSION=1.8.2 sh</CodeBlock>
+  <CodeBlock title="shell">curl -fsSL https://denny.li/install.sh | AEGIS_VERSION=1.8.2 sh</CodeBlock>
 
   <h2 id="offline">Offline installation</h2>
   <p>

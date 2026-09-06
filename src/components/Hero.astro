@@ -8,8 +8,8 @@ const t = copy[lang].hero;
 
 /** The install line per platform. The prompt character differs too. */
 const platforms = {
-  unix: { prompt: "$", command: "curl -fsSL aegis.dev/install | sh" },
-  windows: { prompt: ">", command: "irm aegis.dev/install.ps1 | iex" },
+  unix: { prompt: "$", command: "curl -fsSL https://denny.li/install.sh | sh" },
+  windows: { prompt: ">", command: "irm https://denny.li/install.ps1 | iex" },
 };
 
 const installCommand = platforms.unix.command;
