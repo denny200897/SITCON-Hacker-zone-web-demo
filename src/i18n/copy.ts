@@ -31,6 +31,9 @@ export const copy = {
       copy: "Copy install command",
       installLabel: "Install command",
       note: "Supports macOS, Linux, and Windows (WSL). Requires Git and a supported shell.",
+      toWindows: "Windows version",
+      toUnix: "macOS / Linux version",
+      noteWindows: "Windows 10 or later with PowerShell. Requires Git.",
     },
     harness: {
       title: "The harness, as it runs",
@@ -180,6 +183,9 @@ export const copy = {
       copy: "複製安裝指令",
       installLabel: "安裝指令",
       note: "支援 macOS、Linux 與 Windows (WSL)，需要 Git 與支援的 shell。",
+      toWindows: "Windows 版本",
+      toUnix: "macOS / Linux 版本",
+      noteWindows: "Windows 10 以上並具備 PowerShell，需要 Git。",
     },
     harness: {
       title: "實際執行的畫面",

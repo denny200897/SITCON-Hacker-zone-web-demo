@@ -6,7 +6,13 @@ import { copy } from "../i18n/copy";
 const lang = getLang(Astro.url);
 const t = copy[lang].hero;
 
-const installCommand = "curl -fsSL aegis.dev/install | sh";
+/** The install line per platform. The prompt character differs too. */
+const platforms = {
+  unix: { prompt: "$", command: "curl -fsSL aegis.dev/install | sh" },
+  windows: { prompt: ">", command: "irm aegis.dev/install.ps1 | iex" },
+};
+
+const installCommand = platforms.unix.command;
 ---
 
 <section class="hero" id="product" data-anim-scope>
@@ -22,7 +28,7 @@ const installCommand = "curl -fsSL aegis.dev/install | sh";
 
       <div class="install" aria-label={t.installLabel}>
         <div class="install-glow" aria-hidden="true"></div>
-        <code><span class="prompt">$</span> <span class="command">{installCommand}</span><span class="cursor" aria-hidden="true"></span></code>
+        <code><span class="prompt" data-prompt>{platforms.unix.prompt}</span> <span class="command" data-command>{installCommand}</span><span class="cursor" aria-hidden="true"></span></code>
         <button
           type="button"
           class="copy"
@@ -34,9 +40,16 @@ const installCommand = "curl -fsSL aegis.dev/install | sh";
       </div>
 
       <div class="cta">
-        <a class="btn btn-primary" href="/docs/install/">
-          <Icons name="terminal" size={18} /> {t.install}
-        </a>
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-platform-toggle
+          aria-pressed="false"
+        >
+          <span class="btn-icon" data-icon-windows><Icons name="windows" size={17} /></span>
+          <span class="btn-icon" data-icon-unix hidden><Icons name="terminal" size={18} /></span>
+          <span data-platform-label>{t.toWindows}</span>
+        </button>
         <a
           class="btn btn-ghost"
           href="https://github.com/aegis/aegis"
@@ -45,13 +58,58 @@ const installCommand = "curl -fsSL aegis.dev/install | sh";
           <Icons name="github" size={18} /> {t.github}
         </a>
       </div>
-      <p class="note">{t.note}</p>
+      <p class="note" data-note>{t.note}</p>
     </div>
   </div>
 </section>
 
-<script>
-  document.querySelectorAll<HTMLButtonElement>(".copy").forEach((button) => {
+<script
+  define:vars={{
+    platforms,
+    labels: { unix: t.toUnix, windows: t.toWindows },
+    notes: { unix: t.note, windows: t.noteWindows },
+  }}
+>
+  // Platform switch: the install line, the prompt character, what the copy
+  // button puts on the clipboard, and the requirements note all follow it.
+  const toggle = document.querySelector("[data-platform-toggle]");
+  const commandEl = document.querySelector("[data-command]");
+  const promptEl = document.querySelector("[data-prompt]");
+  const noteEl = document.querySelector("[data-note]");
+  const labelEl = document.querySelector("[data-platform-label]");
+  const copyButton = document.querySelector(".install .copy");
+  const iconWindows = document.querySelector("[data-icon-windows]");
+  const iconUnix = document.querySelector("[data-icon-unix]");
+
+  let platform = "unix";
+
+  const setPlatform = (next) => {
+    platform = next;
+    const { prompt, command } = platforms[next];
+
+    if (commandEl) {
+      commandEl.textContent = command;
+      // The typing animation is sized in characters, so it has to be retimed
+      // for the new command and replayed.
+      commandEl.style.setProperty("--commandChars", String(command.length));
+      commandEl.classList.remove("retype");
+      void commandEl.offsetWidth;
+      commandEl.classList.add("retype");
+    }
+    if (promptEl) promptEl.textContent = prompt;
+    if (copyButton) copyButton.dataset.copy = command;
+    if (noteEl) noteEl.textContent = notes[next];
+    if (labelEl) labelEl.textContent = next === "unix" ? labels.windows : labels.unix;
+    if (iconWindows) iconWindows.hidden = next !== "unix";
+    if (iconUnix) iconUnix.hidden = next === "unix";
+    toggle?.setAttribute("aria-pressed", String(next === "windows"));
+  };
+
+  toggle?.addEventListener("click", () => {
+    setPlatform(platform === "unix" ? "windows" : "unix");
+  });
+
+  document.querySelectorAll(".copy").forEach((button) => {
     button.addEventListener("click", async () => {
       const text = button.dataset.copy ?? "";
       try {
@@ -335,5 +393,13 @@ const installCommand = "curl -fsSL aegis.dev/install | sh";
     .cta { flex-direction: column; }
     .cta .btn { width: 100%; justify-content: center; }
     .install { justify-content: flex-start; }
+  }
+  /* Platform toggle: the icon swaps with the label, and the install line
+     retypes itself for the new command. */
+  .btn-icon { display: inline-flex; }
+  .btn-icon[hidden] { display: none; }
+  button.btn { cursor: pointer; }
+  .command.retype {
+    animation: command-reveal 0.85s steps(var(--commandChars), end) both;
   }
 </style>
